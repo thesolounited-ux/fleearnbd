@@ -21,4 +21,3 @@
     "NODE_ENV": "production",
     "CLOUDFLARE_R2_BUCKET_NAME": "fleearn-storage"
   }
-}
