@@ -173,3 +173,57 @@ function getMimeType(fileName: string): string {
       return 'application/octet-stream';
   }
 }
+
+/**
+ * Persistently stores the central database JSON into Cloudflare R2
+ */
+export async function saveRemoteDB(data: any): Promise<boolean> {
+  if (!isR2Configured()) return false;
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
+  const r2 = getS3Client();
+  if (!r2) return false;
+  try {
+    const jsonStr = JSON.stringify(data, null, 2);
+    await r2.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: 'system/fleearn_live_db.json',
+        Body: Buffer.from(jsonStr, 'utf-8'),
+        ContentType: 'application/json',
+      })
+    );
+    return true;
+  } catch (err) {
+    console.error('Failed to sync db to Cloudflare R2:', err);
+    return false;
+  }
+}
+
+/**
+ * Loads the central database JSON from Cloudflare R2
+ */
+export async function loadRemoteDB(): Promise<any | null> {
+  if (!isR2Configured()) return null;
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
+  const r2 = getS3Client();
+  if (!r2) return null;
+  try {
+    const file = await getFile('system/fleearn_live_db.json');
+    if (file) {
+      if (file.buffer) {
+        return JSON.parse(file.buffer.toString('utf-8'));
+      }
+      if (file.stream) {
+        const chunks: Buffer[] = [];
+        for await (const chunk of file.stream) {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        }
+        const content = Buffer.concat(chunks).toString('utf-8');
+        return JSON.parse(content);
+      }
+    }
+  } catch {
+    // Initial run or file doesn't exist yet
+  }
+  return null;
+}

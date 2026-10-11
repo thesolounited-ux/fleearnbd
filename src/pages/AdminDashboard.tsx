@@ -188,44 +188,54 @@ export const AdminDashboard: React.FC = () => {
     };
 
     try {
+      let res: Response;
       if (type === 'notice') {
         const url = isNew ? '/api/notices' : `/api/notices/${data.id}`;
         const method = isNew ? 'POST' : 'PUT';
-        await fetch(url, { method, headers, body: JSON.stringify(data) });
+        res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       } else if (type === 'pricing') {
         const url = isNew ? '/api/pricing' : `/api/pricing/${data.id}`;
         const method = isNew ? 'POST' : 'PUT';
-        await fetch(url, { method, headers, body: JSON.stringify(data) });
+        res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       } else if (type === 'app') {
         const url = isNew ? '/api/apps' : `/api/apps/${data.id}`;
         const method = isNew ? 'POST' : 'PUT';
-        await fetch(url, { method, headers, body: JSON.stringify(data) });
+        res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       } else if (type === 'document') {
         const url = `/api/documents/${data.id}`;
-        await fetch(url, { method: 'PUT', headers, body: JSON.stringify(data) });
+        res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(data) });
       } else if (type === 'faq') {
         const url = isNew ? '/api/faqs' : `/api/faqs/${data.id}`;
         const method = isNew ? 'POST' : 'PUT';
-        await fetch(url, { method, headers, body: JSON.stringify(data) });
+        res = await fetch(url, { method, headers, body: JSON.stringify(data) });
       } else if (type === 'ticket') {
-        await fetch(`/api/support/${data.id}/status`, { method: 'PUT', headers, body: JSON.stringify(data) });
+        res = await fetch(`/api/support/${data.id}/status`, { method: 'PUT', headers, body: JSON.stringify(data) });
       } else if (type === 'report') {
-        await fetch(`/api/reports/${data.id}/status`, { method: 'PUT', headers, body: JSON.stringify(data) });
+        res = await fetch(`/api/reports/${data.id}/status`, { method: 'PUT', headers, body: JSON.stringify(data) });
       } else if (type === 'company') {
-        const res = await fetch('/api/company', { method: 'PUT', headers, body: JSON.stringify(data) });
-        const resData = await res.json();
-        if (resData.company) updateCompany(resData.company);
+        res = await fetch('/api/company', { method: 'PUT', headers, body: JSON.stringify(data) });
+        if (res.ok) {
+          const resData = await res.json().catch(() => ({}));
+          if (resData.company) updateCompany(resData.company);
+        }
       } else if (type === 'gallery') {
-        await fetch('/api/gallery', { method: 'PUT', headers, body: JSON.stringify(data) });
+        res = await fetch('/api/gallery', { method: 'PUT', headers, body: JSON.stringify(data) });
       } else if (type === 'stats') {
-        await fetch('/api/stats', { method: 'PUT', headers, body: JSON.stringify(data) });
+        res = await fetch('/api/stats', { method: 'PUT', headers, body: JSON.stringify(data) });
+      } else {
+        throw new Error('Unknown item type');
+      }
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Server responded with HTTP ${res.status}`);
       }
 
       setEditingItem(null);
       showStatus('Record saved successfully.');
       fetchAllData();
-    } catch (err) {
-      alert('Save operation failed.');
+    } catch (err: any) {
+      alert(`Save operation failed: ${err.message || 'Server connection error'}`);
     }
   };
 

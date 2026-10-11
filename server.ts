@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
-import { uploadFile, getFile, isR2Configured } from './src/lib/storage.ts';
+import { uploadFile, getFile, isR2Configured, saveRemoteDB, loadRemoteDB } from './src/lib/storage.ts';
 
 dotenv.config();
 
@@ -842,28 +842,73 @@ const defaultData = {
   ]
 };
 
+// Database storage state with R2 Cloud Persistence
+let inMemoryDB: any = null;
+let lastR2SyncTime = 0;
+const R2_SYNC_INTERVAL_MS = 10000; // 10s sync window for multi-instance deployments
+
+// Background R2 fetch
+async function syncFromR2() {
+  if (!isR2Configured()) return;
+  try {
+    const remote = await loadRemoteDB();
+    if (remote) {
+      inMemoryDB = remote;
+      lastR2SyncTime = Date.now();
+    }
+  } catch (err) {
+    // Ignore error in background sync
+  }
+}
+
+// Initial background sync
+syncFromR2();
+
 // Database storage helper
 function loadDB() {
+  const now = Date.now();
+  if (isR2Configured() && now - lastR2SyncTime > R2_SYNC_INTERVAL_MS) {
+    lastR2SyncTime = now;
+    syncFromR2();
+  }
+
+  if (inMemoryDB) {
+    return inMemoryDB;
+  }
+
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
       const parsed = JSON.parse(content);
-      // Ensure uploadedFiles array exists
       if (!parsed.uploadedFiles) parsed.uploadedFiles = [];
-      return parsed;
+      inMemoryDB = parsed;
+      return inMemoryDB;
     }
   } catch (err) {
     console.error('Error reading db.json, returning default:', err);
   }
-  saveDB(defaultData);
-  return defaultData;
+
+  inMemoryDB = JSON.parse(JSON.stringify(defaultData));
+  saveDB(inMemoryDB);
+  return inMemoryDB;
 }
 
 function saveDB(data: any) {
+  inMemoryDB = data;
   try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error writing to db.json:', err);
+    // Safe error suppression on read-only serverless filesystems
+  }
+
+  // Persistently mirror to Cloudflare R2
+  if (isR2Configured()) {
+    saveRemoteDB(data).catch((err) => {
+      console.error('Background R2 save error:', err);
+    });
   }
 }
 
@@ -1770,6 +1815,11 @@ app.get('/api/admin/metrics', requireAdmin, (req, res) => {
 // VITE DEV SERVER OR STATIC PRODUCTION BUILD
 // ==========================================
 async function startServer() {
+  if (process.env.VERCEL) {
+    // Vercel Serverless Function environment: listener is managed by Vercel lambda
+    return;
+  }
+
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -1795,3 +1845,6 @@ async function startServer() {
 startServer().catch((err) => {
   console.error('Fatal server startup error:', err);
 });
+
+export { app };
+export default app;
