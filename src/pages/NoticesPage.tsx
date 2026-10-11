@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Notice } from '../types';
-import { Search, Clock, Eye, AlertCircle, FileText, Image as ImageIcon, Download, ExternalLink, X } from 'lucide-react';
+import { Search, Clock, Eye, AlertCircle, FileText, Image as ImageIcon, Download, X } from 'lucide-react';
 
 export const NoticesPage: React.FC = () => {
   const { t, language, pageParams } = useApp();
@@ -75,7 +75,6 @@ export const NoticesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const safeGet = (url: string) => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
@@ -96,16 +95,16 @@ export const NoticesPage: React.FC = () => {
   }, [pageParams]);
 
   const currentList = activeTab === 'active' ? activeNotices : previousNotices;
-
   const categories = ['All', ...Array.from(new Set(currentList.map(n => n.category)))];
 
   const filteredNotices = currentList.filter(n => {
-    const title = language === 'bn' && n.title_bn ? n.title_bn : n.title;
-    const matchesSearch = title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.shortDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.content?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (n.title_bn && n.title_bn.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (n.shortDescription && n.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()));
+
     const matchesCategory = categoryFilter === 'All' || n.category === categoryFilter;
-    const matchesType = typeFilter === 'All' || (n.noticeType || 'text') === typeFilter;
+    const matchesType = typeFilter === 'All' || n.noticeType === typeFilter;
+
     return matchesSearch && matchesCategory && matchesType;
   });
 
@@ -124,36 +123,36 @@ export const NoticesPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 space-y-6 sm:space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 space-y-6 sm:space-y-8 text-[#F3F7F5]">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl sm:text-4xl font-black text-neutral-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-black text-[#F3F7F5] tracking-tight">
           {t('latestNoticesTitle')}
         </h1>
-        <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mt-2 max-w-2xl leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#A7B5AE] mt-2 max-w-2xl leading-relaxed">
           {t('latestNoticesSubtitle')}
         </p>
       </div>
 
       {/* Tabs & Filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-4">
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg self-start">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#34433B] pb-4">
+        <div className="flex items-center gap-1.5 p-1 bg-[#1A211E] border border-[#34433B] rounded-xl self-start">
           <button
             onClick={() => setActiveTab('active')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+            className={`min-h-[38px] px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
               activeTab === 'active'
-                ? 'bg-white dark:bg-[#111816] text-[#044541] dark:text-emerald-400 shadow-sm'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                ? 'bg-[#044541] text-[#F3F7F5] border border-[#18D6A0]/40 shadow-sm'
+                : 'text-[#A7B5AE] hover:text-[#F3F7F5]'
             }`}
           >
             {t('activeNoticesTab')} ({activeNotices.length})
           </button>
           <button
             onClick={() => setActiveTab('previous')}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-md transition-all cursor-pointer ${
+            className={`min-h-[38px] px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all cursor-pointer ${
               activeTab === 'previous'
-                ? 'bg-white dark:bg-[#111816] text-[#044541] dark:text-emerald-400 shadow-sm'
-                : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                ? 'bg-[#044541] text-[#F3F7F5] border border-[#18D6A0]/40 shadow-sm'
+                : 'text-[#A7B5AE] hover:text-[#F3F7F5]'
             }`}
           >
             {t('expiredNoticesTab')} ({previousNotices.length})
@@ -163,34 +162,34 @@ export const NoticesPage: React.FC = () => {
         {/* Search & Category Filter */}
         <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
           <div className="relative flex-1 sm:w-60 min-w-[180px]">
-            <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#84958C] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('searchNoticesPlaceholder')}
-              className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-[#111816] border border-neutral-200 dark:border-neutral-800 rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#044541]"
+              className="w-full pl-9 pr-3 py-2 text-xs bg-[#1A211E] border border-[#34433B] rounded-xl text-[#F3F7F5] placeholder:text-[#84958C] focus:border-[#18D6A0] focus:ring-1 focus:ring-[#18D6A0] outline-none min-h-[38px]"
             />
           </div>
 
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-2.5 py-2 text-xs bg-white dark:bg-[#111816] border border-neutral-200 dark:border-neutral-800 rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#044541]"
+            className="px-2.5 py-2 text-xs bg-[#1A211E] border border-[#34433B] rounded-xl text-[#F3F7F5] focus:border-[#18D6A0] focus:ring-1 focus:ring-[#18D6A0] outline-none min-h-[38px]"
           >
-            <option value="All">All Formats</option>
-            <option value="text">Text Notice</option>
-            <option value="pdf">PDF Notice</option>
-            <option value="image">Image Notice</option>
+            <option value="All" className="bg-[#1A211E] text-[#F3F7F5]">All Formats</option>
+            <option value="text" className="bg-[#1A211E] text-[#F3F7F5]">Text Notice</option>
+            <option value="pdf" className="bg-[#1A211E] text-[#F3F7F5]">PDF Notice</option>
+            <option value="image" className="bg-[#1A211E] text-[#F3F7F5]">Image Notice</option>
           </select>
 
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2.5 py-2 text-xs bg-white dark:bg-[#111816] border border-neutral-200 dark:border-neutral-800 rounded-lg text-neutral-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#044541]"
+            className="px-2.5 py-2 text-xs bg-[#1A211E] border border-[#34433B] rounded-xl text-[#F3F7F5] focus:border-[#18D6A0] focus:ring-1 focus:ring-[#18D6A0] outline-none min-h-[38px]"
           >
             {categories.map(c => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c} className="bg-[#1A211E] text-[#F3F7F5]">{c}</option>
             ))}
           </select>
         </div>
@@ -198,9 +197,9 @@ export const NoticesPage: React.FC = () => {
 
       {/* Notices List */}
       {filteredNotices.length === 0 ? (
-        <div className="text-center py-16 border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-[#111816] p-8">
-          <AlertCircle className="w-8 h-8 text-neutral-400 mx-auto mb-3" />
-          <p className="text-xs sm:text-sm font-medium text-neutral-600 dark:text-neutral-400">
+        <div className="text-center py-16 border border-[#34433B] rounded-2xl bg-[#111714] p-8">
+          <AlertCircle className="w-8 h-8 text-[#84958C] mx-auto mb-3" />
+          <p className="text-xs sm:text-sm font-medium text-[#A7B5AE]">
             {t('noNoticesFound')}
           </p>
         </div>
@@ -214,59 +213,47 @@ export const NoticesPage: React.FC = () => {
               <div
                 key={n.id}
                 onClick={() => setSelectedNotice(n)}
-                className="group p-5 sm:p-6 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] hover:border-[#044541] dark:hover:border-emerald-600 transition-all cursor-pointer"
+                className="group p-5 sm:p-6 rounded-2xl border border-[#34433B] bg-[#111714] hover:border-[#18D6A0]/60 transition-all cursor-pointer shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
-                    {/* Clean unboxed metadata (zero-pill discipline) */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                      <span className="font-semibold text-[#044541] dark:text-emerald-400">{n.category}</span>
-                      <span aria-hidden="true">·</span>
-                      <span className="capitalize font-mono text-[11px] text-neutral-400">
-                        {isPdf ? 'PDF Notice' : isImage ? 'Image Notice' : 'Text Notice'}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1A211E] border border-[#34433B] text-[#18D6A0]">
+                        {n.category}
                       </span>
-                      <span aria-hidden="true">·</span>
-                      <span>{t('publishedOn')}: {new Date(n.publicationDate).toLocaleDateString()}</span>
-                      <span aria-hidden="true">·</span>
-                      <span className={n.priority === 'High' ? 'text-red-600 font-semibold' : ''}>
-                        {n.priority}
+                      {isPdf && (
+                        <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-red-950/60 border border-red-900/60 text-red-300 flex items-center gap-1">
+                          <FileText className="w-3 h-3 text-red-400" />
+                          <span>PDF Document</span>
+                        </span>
+                      )}
+                      {isImage && (
+                        <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-blue-950/60 border border-blue-900/60 text-blue-300 flex items-center gap-1">
+                          <ImageIcon className="w-3 h-3 text-blue-400" />
+                          <span>Official Graphic</span>
+                        </span>
+                      )}
+                      <span className="text-[11px] text-[#84958C] font-mono">
+                        {n.publicationDate}
                       </span>
                     </div>
 
-                    <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white group-hover:text-[#044541] dark:group-hover:text-emerald-400 transition-colors leading-snug">
+                    <h2 className="text-base sm:text-lg font-bold text-[#F3F7F5] group-hover:text-[#18D6A0] transition-colors leading-snug">
                       {getNoticeTitle(n)}
                     </h2>
 
-                    <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-4xl line-clamp-2">
+                    <p className="text-xs sm:text-sm text-[#A7B5AE] leading-relaxed line-clamp-2">
                       {getNoticeDesc(n)}
                     </p>
-
-                    {/* Notice Attachment Preview Badge */}
-                    {isPdf && (
-                      <div className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium pt-1">
-                        <FileText className="w-3.5 h-3.5 shrink-0" />
-                        <span>Attached Document: {n.fileName || 'Notice_Document.pdf'}</span>
-                      </div>
-                    )}
-                    {isImage && n.fileUrl && (
-                      <div className="pt-2">
-                        <img
-                          src={n.fileUrl}
-                          alt={n.title}
-                          className="h-20 w-auto rounded border border-neutral-200 dark:border-neutral-800 object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                    )}
                   </div>
 
-                  <div className="text-xs text-neutral-400 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100 dark:border-neutral-800">
-                    <span className="flex items-center gap-1">
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0">
+                    <div className="flex items-center gap-1 text-[11px] text-[#84958C]">
                       <Eye className="w-3.5 h-3.5" />
-                      <span className="tabular-nums">{n.views || 0}</span>
-                    </span>
-                    <span className="font-semibold text-[#044541] dark:text-emerald-400 group-hover:underline">
-                      View Details →
+                      <span>{n.views || 0}</span>
+                    </div>
+                    <span className="text-xs font-semibold text-[#18D6A0] group-hover:underline">
+                      View Notice →
                     </span>
                   </div>
                 </div>
@@ -276,52 +263,49 @@ export const NoticesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Notice Detail Modal */}
+      {/* Modal View for Notice Details */}
       {selectedNotice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-3xl bg-white dark:bg-[#111816] rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 p-5 sm:p-8 max-h-[90vh] overflow-y-auto space-y-6">
-            <div className="flex items-start justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="relative w-full max-w-2xl bg-[#111714] text-[#F3F7F5] rounded-2xl shadow-2xl border border-[#34433B] max-h-[92vh] flex flex-col p-5 sm:p-7 space-y-4 overflow-y-auto">
+            <div className="flex items-start justify-between gap-4 border-b border-[#34433B] pb-4">
               <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                  <span className="font-semibold text-[#044541] dark:text-emerald-400">{selectedNotice.category}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className="capitalize">{selectedNotice.noticeType || 'text'} Notice</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{new Date(selectedNotice.publicationDate).toLocaleDateString()}</span>
-                  <span aria-hidden="true">·</span>
-                  <span className={selectedNotice.priority === 'High' ? 'text-red-600 font-semibold' : ''}>
-                    {selectedNotice.priority}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#1A211E] border border-[#34433B] text-[#18D6A0]">
+                    {selectedNotice.category}
+                  </span>
+                  <span className="text-xs text-[#84958C] font-mono">
+                    {selectedNotice.publicationDate}
                   </span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white">
+                <h3 className="text-lg sm:text-xl font-bold text-[#F3F7F5] pt-1">
                   {getNoticeTitle(selectedNotice)}
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedNotice(null)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+                className="p-1.5 rounded-lg text-[#84958C] hover:text-[#F3F7F5] hover:bg-[#1A211E] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed space-y-4">
+            <div className="text-xs sm:text-sm text-[#A7B5AE] leading-relaxed space-y-4">
               {getNoticeDesc(selectedNotice) && (
-                <p className="font-medium text-neutral-900 dark:text-white bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                <p className="font-medium text-[#F3F7F5] bg-[#1A211E] p-4 rounded-xl border border-[#34433B]">
                   {getNoticeDesc(selectedNotice)}
                 </p>
               )}
 
               {/* Notice Content */}
               {selectedNotice.content && (
-                <div className="whitespace-pre-line leading-relaxed">
+                <div className="whitespace-pre-line leading-relaxed text-[#F3F7F5]">
                   {selectedNotice.content}
                 </div>
               )}
 
               {/* If Image Notice: show high-res image */}
               {selectedNotice.noticeType === 'image' && selectedNotice.fileUrl && (
-                <div className="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 my-4 bg-neutral-50 dark:bg-neutral-900">
+                <div className="rounded-xl overflow-hidden border border-[#34433B] my-4 bg-[#1A211E]">
                   <img
                     src={selectedNotice.fileUrl}
                     alt={selectedNotice.title}
@@ -333,14 +317,14 @@ export const NoticesPage: React.FC = () => {
 
               {/* If PDF Notice: show PDF action */}
               {selectedNotice.noticeType === 'pdf' && (
-                <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 rounded-xl border border-[#34433B] bg-[#1A211E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-red-500 shrink-0" />
+                    <FileText className="w-8 h-8 text-red-400 shrink-0" />
                     <div>
-                      <h4 className="font-bold text-sm text-neutral-900 dark:text-white">
+                      <h4 className="font-bold text-sm text-[#F3F7F5]">
                         {selectedNotice.fileName || 'Notice_Document.pdf'}
                       </h4>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-[#84958C]">
                         {selectedNotice.fileSize || 'PDF Document'} · Cloudflare R2 Storage
                       </span>
                     </div>
@@ -351,23 +335,23 @@ export const NoticesPage: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     download
-                    className="px-4 py-2 rounded-lg bg-[#044541] hover:bg-[#033633] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#044541] hover:bg-[#065b56] border border-[#18D6A0]/40 text-[#F3F7F5] text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 text-[#18D6A0]" />
                     <span>Download / Open PDF</span>
                   </a>
                 </div>
               )}
             </div>
 
-            <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-neutral-500">
+            <div className="pt-4 border-t border-[#34433B] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#84958C]">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+                <Clock className="w-4 h-4 text-[#18D6A0]" />
                 <span>Expiration: {selectedNotice.expirationDate ? new Date(selectedNotice.expirationDate).toLocaleString() : 'Permanent / Non-expiring'}</span>
               </div>
               <button
                 onClick={() => setSelectedNotice(null)}
-                className="px-4 py-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-semibold hover:bg-neutral-200 cursor-pointer self-end sm:self-auto"
+                className="min-h-[40px] px-4 py-2 rounded-xl bg-[#1A211E] border border-[#34433B] text-[#F3F7F5] font-semibold hover:bg-[#232D29] cursor-pointer self-end sm:self-auto"
               >
                 Close
               </button>

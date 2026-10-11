@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { FAQItem } from '../types';
-import { Search, ChevronDown, ThumbsUp, ThumbsDown, HelpCircle, Check, AlertCircle } from 'lucide-react';
+import { Search, ChevronDown, ThumbsUp, ThumbsDown, AlertCircle } from 'lucide-react';
 
 export const FAQPage: React.FC = () => {
   const { t, language } = useApp();
@@ -10,7 +10,7 @@ export const FAQPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [votedMap, setVotedMap] = useState<Record<string, 'yes' | 'no'>>({});
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const categories = [
     "All",
@@ -96,29 +96,29 @@ export const FAQPage: React.FC = () => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 space-y-12 text-[#F3F7F5]">
       {/* Title */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <span className="text-xs font-bold uppercase tracking-widest text-[#044541] dark:text-emerald-400">
+        <span className="text-xs font-bold uppercase tracking-widest text-[#18D6A0]">
           Knowledge Base & User Assistance
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black text-neutral-900 dark:text-white tracking-tight">
+        <h1 className="text-3xl sm:text-5xl font-black text-[#F3F7F5] tracking-tight">
           {t('faqTitle')}
         </h1>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#A7B5AE] leading-relaxed">
           {t('faqSubtitle')}
         </p>
       </div>
 
       {/* Search Input */}
       <div className="max-w-2xl mx-auto relative">
-        <Search className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        <Search className="w-5 h-5 text-[#84958C] absolute left-4 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t('searchFaq')}
-          className="w-full pl-12 pr-4 py-3.5 text-sm bg-white dark:bg-[#111816] border border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#044541]"
+          className="w-full pl-12 pr-4 py-3.5 text-xs sm:text-sm bg-[#1A211E] border border-[#34433B] rounded-xl text-[#F3F7F5] placeholder:text-[#84958C] shadow-sm focus:border-[#18D6A0] focus:ring-1 focus:ring-[#18D6A0] outline-none min-h-[44px] transition-colors"
         />
       </div>
 
@@ -128,10 +128,10 @@ export const FAQPage: React.FC = () => {
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-all cursor-pointer ${
+            className={`min-h-[38px] px-3.5 py-1.5 text-xs font-semibold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === cat
-                ? 'bg-[#044541] text-white shadow'
-                : 'bg-neutral-100 dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-800'
+                ? 'bg-[#044541] text-[#F3F7F5] border border-[#18D6A0]/50 shadow'
+                : 'bg-[#1A211E] border border-[#34433B] text-[#A7B5AE] hover:text-[#F3F7F5] hover:bg-[#232D29]'
             }`}
           >
             {cat}
@@ -141,9 +141,9 @@ export const FAQPage: React.FC = () => {
 
       {/* FAQ Accordion List */}
       {filteredFaqs.length === 0 ? (
-        <div className="text-center py-16 border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-[#111816] p-8">
-          <AlertCircle className="w-8 h-8 text-neutral-400 mx-auto mb-3" />
-          <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+        <div className="text-center py-16 border border-[#34433B] rounded-2xl bg-[#111714] p-8">
+          <AlertCircle className="w-8 h-8 text-[#84958C] mx-auto mb-3" />
+          <p className="text-xs sm:text-sm font-medium text-[#A7B5AE]">
             No FAQ entries found for your query. Try searching with different keywords.
           </p>
         </div>
@@ -158,65 +158,65 @@ export const FAQPage: React.FC = () => {
             return (
               <div
                 key={faq.id}
-                className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] overflow-hidden transition-all shadow-sm"
+                className="rounded-2xl border border-[#34433B] bg-[#111714] overflow-hidden transition-all shadow-sm"
               >
                 <button
                   onClick={() => toggleExpand(faq.id)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[#1A211E]/40 transition-colors"
                 >
                   <div className="space-y-1 pr-2">
-                    <span className="text-[11px] font-semibold text-[#044541] dark:text-emerald-400 block">
+                    <span className="text-[11px] font-semibold text-[#18D6A0] block">
                       {faq.category}
                     </span>
-                    <h3 className="text-base font-bold text-neutral-900 dark:text-white leading-snug">
+                    <h3 className="text-sm sm:text-base font-bold text-[#F3F7F5] leading-snug">
                       {q}
                     </h3>
                   </div>
                   <ChevronDown
-                    className={`w-5 h-5 text-neutral-400 shrink-0 transition-transform duration-200 ${
-                      isExpanded ? 'rotate-180 text-[#044541] dark:text-emerald-400' : ''
+                    className={`w-5 h-5 text-[#84958C] shrink-0 transition-transform duration-200 ${
+                      isExpanded ? 'rotate-180 text-[#18D6A0]' : ''
                     }`}
                   />
                 </button>
 
                 {isExpanded && (
-                  <div className="px-5 pb-5 pt-1 border-t border-neutral-100 dark:border-neutral-800/80 space-y-4">
-                    <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                  <div className="px-5 pb-5 pt-1 border-t border-[#34433B] space-y-4">
+                    <p className="text-xs sm:text-sm text-[#A7B5AE] leading-relaxed">
                       {a}
                     </p>
 
                     {/* Helpful / Not Helpful Feedback */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-neutral-100 dark:border-neutral-800/60 text-xs text-neutral-500">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#34433B] text-xs text-[#84958C]">
                       <div className="flex items-center gap-2">
-                        <span>{t('wasHelpful')}</span>
+                        <span className="text-[#A7B5AE]">{t('wasHelpful')}</span>
                         <button
                           onClick={() => handleVote(faq.id, true)}
                           disabled={!!userVote}
-                          className={`px-2.5 py-1 rounded border flex items-center gap-1 transition-colors cursor-pointer ${
+                          className={`min-h-[32px] px-2.5 py-1 rounded-lg border flex items-center gap-1 transition-colors cursor-pointer ${
                             userVote === 'yes'
-                              ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 border-emerald-400 font-bold'
-                              : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900'
+                              ? 'bg-[#044541] text-[#F3F7F5] border-[#18D6A0] font-bold'
+                              : 'border-[#34433B] bg-[#1A211E] text-[#A7B5AE] hover:text-[#F3F7F5] hover:bg-[#232D29]'
                           }`}
                         >
-                          <ThumbsUp className="w-3.5 h-3.5" />
+                          <ThumbsUp className="w-3.5 h-3.5 text-[#18D6A0]" />
                           <span>{t('yes')} ({faq.helpfulCount || 0})</span>
                         </button>
 
                         <button
                           onClick={() => handleVote(faq.id, false)}
                           disabled={!!userVote}
-                          className={`px-2.5 py-1 rounded border flex items-center gap-1 transition-colors cursor-pointer ${
+                          className={`min-h-[32px] px-2.5 py-1 rounded-lg border flex items-center gap-1 transition-colors cursor-pointer ${
                             userVote === 'no'
-                              ? 'bg-red-50 dark:bg-red-950 text-red-700 border-red-400 font-bold'
-                              : 'border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-900'
+                              ? 'bg-red-950/60 text-red-300 border-red-800 font-bold'
+                              : 'border-[#34433B] bg-[#1A211E] text-[#A7B5AE] hover:text-[#F3F7F5] hover:bg-[#232D29]'
                           }`}
                         >
-                          <ThumbsDown className="w-3.5 h-3.5" />
+                          <ThumbsDown className="w-3.5 h-3.5 text-red-400" />
                           <span>{t('no')} ({faq.unhelpfulCount || 0})</span>
                         </button>
                       </div>
 
-                      <span className="text-[11px] text-neutral-400 font-mono">
+                      <span className="text-[11px] text-[#84958C] font-mono">
                         Item ID: {faq.id}
                       </span>
                     </div>

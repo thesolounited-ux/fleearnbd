@@ -141,27 +141,27 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col space-y-16 lg:space-y-24 pb-16">
+    <div className="w-full flex flex-col space-y-16 lg:space-y-24 pb-16 text-[#F3F7F5]">
       {/* A. HERO SECTION */}
-      <section className="relative w-full overflow-hidden pt-8 lg:pt-16 pb-12 lg:pb-20 border-b border-neutral-200/80 dark:border-neutral-800/80">
+      <section className="relative w-full overflow-hidden pt-8 lg:pt-16 pb-12 lg:pb-20 border-b border-[#34433B]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              {/* Trust Marker (quiet text, zero pill) */}
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#044541] dark:text-emerald-400 tracking-wide uppercase">
+              {/* Trust Marker */}
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#18D6A0] tracking-wide uppercase">
                 <span>{t('heroBadge')}</span>
                 <span aria-hidden="true">·</span>
                 <span>Tier-1 Payout Security</span>
               </div>
 
               {/* Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-neutral-900 dark:text-white tracking-tight leading-[1.1] text-balance">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#F3F7F5] tracking-tight leading-[1.1] text-balance">
                 {t('heroHeadline')}
               </h1>
 
               {/* Subheadline */}
-              <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-300 max-w-2xl leading-relaxed">
+              <p className="text-base sm:text-lg text-[#A7B5AE] max-w-2xl leading-relaxed">
                 {t('heroSubheadline')}
               </p>
 
@@ -169,46 +169,46 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={() => navigateTo('apps')}
-                  className="px-5 py-3 rounded-lg text-sm font-semibold text-white bg-[#044541] hover:bg-[#033633] transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                  className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-bold text-[#F3F7F5] bg-[#044541] hover:bg-[#065b56] border border-[#18D6A0]/40 transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 text-[#18D6A0]" />
                   <span>{t('downloadApp')}</span>
                 </button>
                 <button
                   onClick={() => navigateTo('features')}
-                  className="px-5 py-3 rounded-lg text-sm font-semibold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-semibold text-[#F3F7F5] bg-[#1A211E] hover:bg-[#232D29] border border-[#34433B] transition-colors cursor-pointer"
                 >
                   {t('exploreFeatures')}
                 </button>
                 <button
                   onClick={() => navigateTo('pricing')}
-                  className="px-5 py-3 rounded-lg text-sm font-semibold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-semibold text-[#F3F7F5] bg-[#1A211E] hover:bg-[#232D29] border border-[#34433B] transition-colors cursor-pointer"
                 >
                   {t('viewPricing')}
                 </button>
                 <button
                   onClick={() => navigateTo('notices')}
-                  className="px-5 py-3 rounded-lg text-sm font-semibold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-800/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                  className="min-h-[44px] px-5 py-3 rounded-xl text-sm font-semibold text-[#F3F7F5] bg-[#1A211E] hover:bg-[#232D29] border border-[#34433B] transition-colors cursor-pointer"
                 >
                   {t('readNotices')}
                 </button>
               </div>
 
               {/* Ethical Disclaimer against speculative income */}
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 pt-2 border-t border-neutral-200 dark:border-neutral-800 max-w-xl leading-relaxed">
+              <p className="text-xs text-[#84958C] pt-2 border-t border-[#34433B] max-w-xl leading-relaxed">
                 {t('disclaimerEarnings')}
               </p>
             </div>
 
-            {/* Right: Interactive 3D Visual & High-Fidelity Asset */}
-            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[360px] lg:min-h-[460px] rounded-2xl border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100/50 dark:bg-[#111816]/60 backdrop-blur-sm overflow-hidden p-4 shadow-sm">
+            {/* Right: Interactive 3D Visual */}
+            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[360px] lg:min-h-[460px] rounded-2xl border border-[#34433B] bg-[#111714] overflow-hidden p-4 shadow-sm">
               <ThreeCanvas className="w-full h-full" />
-              <div className="absolute bottom-4 left-4 right-4 bg-white/85 dark:bg-[#0B0F0E]/85 backdrop-blur-md rounded-lg p-3 border border-neutral-200 dark:border-neutral-800 flex items-center justify-between text-xs">
+              <div className="absolute bottom-4 left-4 right-4 bg-[#111714]/90 backdrop-blur-md rounded-xl p-3 border border-[#34433B] flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span className="text-neutral-800 dark:text-neutral-200 font-medium">3D Verified Node Orbit</span>
+                  <ShieldCheck className="w-4 h-4 text-[#18D6A0] shrink-0" />
+                  <span className="text-[#F3F7F5] font-medium">3D Verified Node Orbit</span>
                 </div>
-                <span className="text-neutral-500 font-mono text-[11px]">TLS 1.3 · SHA-256</span>
+                <span className="text-[#84958C] font-mono text-[11px]">TLS 1.3 · SHA-256</span>
               </div>
             </div>
           </div>
@@ -217,18 +217,18 @@ export const HomePage: React.FC = () => {
 
       {/* B. LATEST NOTICES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-neutral-800">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#34433B]">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
+            <h2 className="text-2xl font-bold tracking-tight text-[#F3F7F5]">
               {t('latestNoticesTitle')}
             </h2>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+            <p className="text-sm text-[#A7B5AE] mt-1">
               {t('latestNoticesSubtitle')}
             </p>
           </div>
           <button
             onClick={() => navigateTo('notices')}
-            className="text-sm font-semibold text-[#044541] dark:text-emerald-400 hover:underline flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+            className="text-sm font-semibold text-[#18D6A0] hover:underline flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
           >
             <span>{t('viewAllNotices')}</span>
             <ArrowRight className="w-4 h-4" />
@@ -240,32 +240,31 @@ export const HomePage: React.FC = () => {
             <div
               key={n.id}
               onClick={() => navigateTo('notices', { selectedNoticeId: n.id })}
-              className="group p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] hover:border-[#044541] dark:hover:border-emerald-600 transition-all cursor-pointer flex flex-col justify-between"
+              className="group p-5 rounded-2xl border border-[#34433B] bg-[#111714] hover:border-[#18D6A0] transition-all cursor-pointer flex flex-col justify-between"
             >
               <div className="space-y-3">
-                {/* Unboxed Metadata (Zero-pill discipline) */}
-                <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                  <span className="font-semibold text-[#044541] dark:text-emerald-400">{n.category}</span>
+                <div className="flex items-center gap-2 text-xs text-[#84958C]">
+                  <span className="font-semibold text-[#18D6A0]">{n.category}</span>
                   <span aria-hidden="true">·</span>
                   <span>{new Date(n.publicationDate).toLocaleDateString()}</span>
                   <span aria-hidden="true">·</span>
-                  <span className={n.priority === 'High' ? 'text-red-600 dark:text-red-400 font-semibold' : ''}>
+                  <span className={n.priority === 'High' ? 'text-red-400 font-semibold' : ''}>
                     {n.priority}
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-neutral-900 dark:text-white group-hover:text-[#044541] dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+                <h3 className="text-base font-bold text-[#F3F7F5] group-hover:text-[#18D6A0] transition-colors line-clamp-2">
                   {getNoticeTitle(n)}
                 </h3>
 
-                <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-[#A7B5AE] line-clamp-3 leading-relaxed">
                   {getNoticeDesc(n)}
                 </p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-neutral-100 dark:border-neutral-800/80 flex items-center justify-between text-xs text-neutral-500">
+              <div className="pt-4 mt-4 border-t border-[#34433B] flex items-center justify-between text-xs text-[#84958C]">
                 <span>{n.views} views</span>
-                <span className="font-medium text-[#044541] dark:text-emerald-400 flex items-center gap-1">
+                <span className="font-medium text-[#18D6A0] flex items-center gap-1">
                   Read Notice <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
@@ -277,56 +276,56 @@ export const HomePage: React.FC = () => {
       {/* C. LATEST MOBILE APPS SHOWCASE */}
       {appData && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] p-6 lg:p-10 shadow-sm">
+          <div className="rounded-2xl border border-[#34433B] bg-[#111714] p-6 lg:p-10 shadow-sm">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* App Image Preview */}
-              <div className="lg:col-span-5 relative rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-800 aspect-4/3 bg-neutral-100 dark:bg-neutral-900">
+              <div className="lg:col-span-5 relative rounded-2xl overflow-hidden border border-[#34433B] aspect-4/3 bg-[#1A211E]">
                 <img
                   src={appData.screenshots[0] || "/src/assets/images/app_showcase_preview_1791686595545.jpg"}
                   alt={appData.name}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-3 left-3 bg-[#044541] text-white text-[11px] font-bold px-2.5 py-1 rounded shadow">
+                <div className="absolute top-3 left-3 bg-[#044541] border border-[#18D6A0]/50 text-[#F3F7F5] text-[11px] font-bold px-2.5 py-1 rounded-lg shadow">
                   Official Android APK
                 </div>
               </div>
 
               {/* App Meta & Download */}
               <div className="lg:col-span-7 space-y-4">
-                <div className="flex items-center gap-2 text-xs text-neutral-500">
-                  <span className="font-semibold text-[#044541] dark:text-emerald-400">Version {appData.currentVersion}</span>
+                <div className="flex items-center gap-2 text-xs text-[#84958C]">
+                  <span className="font-semibold text-[#18D6A0]">Version {appData.currentVersion}</span>
                   <span aria-hidden="true">·</span>
                   <span>Released {appData.releaseDate}</span>
                   <span aria-hidden="true">·</span>
                   <span>{appData.fileSize}</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#F3F7F5]">
                   {appData.name}
                 </h2>
 
-                <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                <p className="text-sm text-[#A7B5AE] leading-relaxed">
                   {appData.shortDescription}
                 </p>
 
                 {/* Specs */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 py-2 text-xs">
-                  <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
-                    <span className="text-neutral-400 block">{t('downloadsCount')}</span>
-                    <span className="font-bold text-neutral-900 dark:text-white text-sm tabular-nums">
+                  <div className="p-3 rounded-xl bg-[#1A211E] border border-[#34433B]">
+                    <span className="text-[#84958C] block">{t('downloadsCount')}</span>
+                    <span className="font-bold text-[#F3F7F5] text-sm tabular-nums">
                       {appData.downloadCount.toLocaleString()}+
                     </span>
                   </div>
-                  <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
-                    <span className="text-neutral-400 block">{t('fileSize')}</span>
-                    <span className="font-bold text-neutral-900 dark:text-white text-sm">
+                  <div className="p-3 rounded-xl bg-[#1A211E] border border-[#34433B]">
+                    <span className="text-[#84958C] block">{t('fileSize')}</span>
+                    <span className="font-bold text-[#F3F7F5] text-sm">
                       {appData.fileSize}
                     </span>
                   </div>
-                  <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 col-span-2 sm:col-span-1">
-                    <span className="text-neutral-400 block">System Requirement</span>
-                    <span className="font-bold text-neutral-900 dark:text-white text-sm">
+                  <div className="p-3 rounded-xl bg-[#1A211E] border border-[#34433B] col-span-2 sm:col-span-1">
+                    <span className="text-[#84958C] block">System Requirement</span>
+                    <span className="font-bold text-[#F3F7F5] text-sm">
                       Android 8.0+
                     </span>
                   </div>
@@ -335,20 +334,20 @@ export const HomePage: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <a
                     href={`/api/apps/${appData.id}/download`}
-                    className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[#044541] hover:bg-[#033633] transition-all shadow flex items-center gap-2 cursor-pointer"
+                    className="min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-bold text-[#F3F7F5] bg-[#044541] hover:bg-[#065b56] border border-[#18D6A0]/40 transition-all shadow flex items-center gap-2 cursor-pointer active:scale-95"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 text-[#18D6A0]" />
                     <span>{t('downloadApk')}</span>
                   </a>
                   <button
                     onClick={() => navigateTo('apps')}
-                    className="px-5 py-2.5 rounded-lg text-sm font-semibold text-neutral-800 dark:text-neutral-200 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+                    className="min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-semibold text-[#F3F7F5] bg-[#1A211E] hover:bg-[#232D29] border border-[#34433B] transition-colors cursor-pointer"
                   >
                     View App Details & Versions
                   </button>
                 </div>
 
-                <p className="text-[11px] text-neutral-500 font-mono pt-1 truncate">
+                <p className="text-[11px] text-[#84958C] font-mono pt-1 truncate">
                   SHA-256: {appData.sha256}
                 </p>
               </div>
@@ -359,11 +358,11 @@ export const HomePage: React.FC = () => {
 
       {/* D. LATEST COURSES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="pb-6 border-b border-neutral-200 dark:border-neutral-800">
-          <h2 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
+        <div className="pb-6 border-b border-[#34433B]">
+          <h2 className="text-2xl font-bold tracking-tight text-[#F3F7F5]">
             {t('coursesTitle')}
           </h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+          <p className="text-sm text-[#A7B5AE] mt-1">
             {t('coursesSubtitle')}
           </p>
         </div>
@@ -372,33 +371,33 @@ export const HomePage: React.FC = () => {
           {courses.map((c) => (
             <div
               key={c.id}
-              className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] overflow-hidden flex flex-col justify-between"
+              className="rounded-2xl border border-[#34433B] bg-[#111714] overflow-hidden flex flex-col justify-between"
             >
               <div>
-                <div className="relative aspect-16/10 bg-neutral-100 dark:bg-neutral-900 overflow-hidden">
+                <div className="relative aspect-16/10 bg-[#1A211E] overflow-hidden">
                   <img
                     src={c.thumbnail}
                     alt={c.title}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white text-[11px] px-2 py-0.5 rounded font-mono">
+                  <div className="absolute bottom-2 left-2 bg-black/80 backdrop-blur-sm text-[#F3F7F5] text-[11px] px-2.5 py-0.5 rounded-md font-mono border border-[#34433B]">
                     {c.duration}
                   </div>
                 </div>
 
                 <div className="p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-xs text-neutral-500">
-                    <span className="font-semibold text-[#044541] dark:text-emerald-400">{c.category}</span>
+                  <div className="flex items-center gap-2 text-xs text-[#84958C]">
+                    <span className="font-semibold text-[#18D6A0]">{c.category}</span>
                     <span aria-hidden="true">·</span>
                     <span>{c.instructor}</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-neutral-900 dark:text-white line-clamp-2">
+                  <h3 className="text-base font-bold text-[#F3F7F5] line-clamp-2">
                     {language === 'bn' && c.title_bn ? c.title_bn : c.title}
                   </h3>
 
-                  <p className="text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#A7B5AE] line-clamp-2 leading-relaxed">
                     {c.description}
                   </p>
                 </div>
@@ -408,12 +407,12 @@ export const HomePage: React.FC = () => {
                 {c.status === 'Available' ? (
                   <button
                     onClick={() => navigateTo('apps')}
-                    className="w-full py-2 rounded-lg text-xs font-semibold text-[#044541] dark:text-emerald-400 border border-[#044541] dark:border-emerald-500 hover:bg-[#044541] hover:text-white dark:hover:bg-emerald-500 dark:hover:text-black transition-colors cursor-pointer"
+                    className="w-full min-h-[40px] py-2 rounded-xl text-xs font-bold text-[#F3F7F5] bg-[#044541] hover:bg-[#065b56] border border-[#18D6A0]/40 transition-colors cursor-pointer"
                   >
                     {t('viewCourse')}
                   </button>
                 ) : (
-                  <div className="w-full py-2 rounded-lg text-xs font-semibold text-center text-neutral-500 bg-neutral-100 dark:bg-neutral-800/60 border border-neutral-200 dark:border-neutral-800">
+                  <div className="w-full min-h-[40px] py-2 rounded-xl text-xs font-semibold text-center text-[#84958C] bg-[#1A211E] border border-[#34433B] flex items-center justify-center">
                     {c.status === 'Coming Soon' ? t('comingSoon') : t('currentlyUnavailable')}
                   </div>
                 )}
@@ -426,10 +425,10 @@ export const HomePage: React.FC = () => {
       {/* E. PLATFORM STATISTICS */}
       {stats && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-[#044541] text-white p-8 lg:p-12 relative overflow-hidden shadow-lg">
+          <div className="rounded-2xl border border-[#18D6A0]/40 bg-[#044541] text-[#F3F7F5] p-8 lg:p-12 relative overflow-hidden shadow-xl">
             <div className="relative z-10 space-y-6">
               <div className="max-w-2xl">
-                <span className="text-xs uppercase tracking-widest text-emerald-300 font-bold block mb-1">
+                <span className="text-xs uppercase tracking-widest text-[#18D6A0] font-bold block mb-1">
                   Verified Telemetry
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black">
@@ -443,13 +442,13 @@ export const HomePage: React.FC = () => {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4 border-t border-emerald-700/60">
                 <div>
                   <span className="text-xs text-emerald-200 block">{t('totalUsers')}</span>
-                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
+                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums text-white">
                     {stats.totalUsers.toLocaleString()}
                   </span>
                 </div>
                 <div>
                   <span className="text-xs text-emerald-200 block">{t('activeUsers')}</span>
-                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
+                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums text-[#18D6A0]">
                     {stats.activeUsers.toLocaleString()}
                   </span>
                 </div>
@@ -461,7 +460,7 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-xs text-emerald-200 block">{t('totalTransactions')}</span>
-                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums">
+                  <span className="text-2xl sm:text-4xl font-extrabold tracking-tight tabular-nums text-white">
                     {stats.totalTransactions.toLocaleString()}
                   </span>
                 </div>
@@ -477,18 +476,18 @@ export const HomePage: React.FC = () => {
           {/* Support Center Card */}
           <div
             onClick={() => navigateTo('support')}
-            className="p-6 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] hover:border-[#044541] dark:hover:border-emerald-500 transition-all cursor-pointer group"
+            className="p-6 rounded-2xl border border-[#34433B] bg-[#111714] hover:border-[#18D6A0] transition-all cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-[#044541] dark:text-emerald-400 flex items-center justify-center mb-4">
+            <div className="w-10 h-10 rounded-xl bg-[#044541] border border-[#18D6A0]/40 text-[#18D6A0] flex items-center justify-center mb-4">
               <HelpCircle className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-1 group-hover:text-[#044541] dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className="text-lg font-bold text-[#F3F7F5] mb-1 group-hover:text-[#18D6A0] transition-colors">
               {t('supportCenterTitle')}
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed mb-4">
+            <p className="text-xs text-[#A7B5AE] leading-relaxed mb-4">
               Need assistance with an account or payout inquiry? Open a ticket with verified resolution tracking.
             </p>
-            <span className="text-xs font-semibold text-[#044541] dark:text-emerald-400 flex items-center gap-1">
+            <span className="text-xs font-semibold text-[#18D6A0] flex items-center gap-1">
               Open Support Ticket <ArrowRight className="w-3.5 h-3.5" />
             </span>
           </div>
@@ -496,18 +495,18 @@ export const HomePage: React.FC = () => {
           {/* Report an Issue Card */}
           <div
             onClick={() => navigateTo('report')}
-            className="p-6 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] hover:border-red-500 dark:hover:border-red-500 transition-all cursor-pointer group"
+            className="p-6 rounded-2xl border border-[#34433B] bg-[#111714] hover:border-red-500 transition-all cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mb-4">
+            <div className="w-10 h-10 rounded-xl bg-red-950/60 border border-red-900/60 text-red-400 flex items-center justify-center mb-4">
               <Flag className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-1 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+            <h3 className="text-lg font-bold text-[#F3F7F5] mb-1 group-hover:text-red-400 transition-colors">
               {t('reportIssueTitle')}
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed mb-4">
+            <p className="text-xs text-[#A7B5AE] leading-relaxed mb-4">
               Report bugs, suspicious tasks, or policy infractions directly to our security arbitration board.
             </p>
-            <span className="text-xs font-semibold text-red-600 dark:text-red-400 flex items-center gap-1">
+            <span className="text-xs font-semibold text-red-400 flex items-center gap-1">
               File Formal Report <ArrowRight className="w-3.5 h-3.5" />
             </span>
           </div>
@@ -515,18 +514,18 @@ export const HomePage: React.FC = () => {
           {/* Contact Us Card */}
           <div
             onClick={() => navigateTo('contact')}
-            className="p-6 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111816] hover:border-[#044541] dark:hover:border-emerald-500 transition-all cursor-pointer group"
+            className="p-6 rounded-2xl border border-[#34433B] bg-[#111714] hover:border-[#18D6A0] transition-all cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-[#044541] dark:text-emerald-400 flex items-center justify-center mb-4">
+            <div className="w-10 h-10 rounded-xl bg-[#044541] border border-[#18D6A0]/40 text-[#18D6A0] flex items-center justify-center mb-4">
               <MessageSquare className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-1 group-hover:text-[#044541] dark:group-hover:text-emerald-400 transition-colors">
+            <h3 className="text-lg font-bold text-[#F3F7F5] mb-1 group-hover:text-[#18D6A0] transition-colors">
               {t('contactUsTitle')}
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed mb-4">
+            <p className="text-xs text-[#A7B5AE] leading-relaxed mb-4">
               Connect with institutional partners, corporate press liaisons, and developer outreach.
             </p>
-            <span className="text-xs font-semibold text-[#044541] dark:text-emerald-400 flex items-center gap-1">
+            <span className="text-xs font-semibold text-[#18D6A0] flex items-center gap-1">
               Get in Touch <ArrowRight className="w-3.5 h-3.5" />
             </span>
           </div>

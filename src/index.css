@@ -4,15 +4,30 @@
   html {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     scroll-behavior: smooth;
+    background-color: #0B0F0E;
+    color: #F3F7F5;
   }
 
-  /* Bengali font fallback */
-  [lang="bn"] {
-    font-family: 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* Bengali Premium Typography */
+  [lang="bn"], html[lang="bn"], body[lang="bn"] {
+    font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: 0.015em;
+    line-height: 1.65;
   }
 
   /* Arabic RTL font */
   [dir="rtl"] {
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Ensure all select dropdowns render dark in all operating systems / mobile Android */
+  select option {
+    background-color: #1A211E !important;
+    color: #F3F7F5 !important;
+  }
+
+  /* Form control defaults */
+  input::placeholder, textarea::placeholder {
+    color: #84958C;
   }
 }

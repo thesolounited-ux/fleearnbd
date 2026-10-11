@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Image, ArrowLeft, ShieldAlert } from 'lucide-react';
+import { Image, ArrowLeft } from 'lucide-react';
 
 export const GalleryPage: React.FC = () => {
   const { t, navigateTo } = useApp();
@@ -21,22 +21,19 @@ export const GalleryPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 lg:py-32 flex flex-col items-center justify-center text-center space-y-6">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 lg:py-32 flex flex-col items-center justify-center text-center space-y-6 text-[#F3F7F5]">
       {/* Refined subtle illustration container */}
-      <div className="relative w-28 h-28 rounded-3xl bg-neutral-100 dark:bg-[#111816] border border-neutral-200 dark:border-neutral-800 flex items-center justify-center shadow-sm">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-[#044541] dark:text-emerald-400 flex items-center justify-center">
-          <Image className="w-8 h-8 opacity-75" />
-        </div>
-        <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center text-neutral-500 text-xs">
-          ·
+      <div className="relative w-28 h-28 rounded-3xl bg-[#111714] border border-[#34433B] flex items-center justify-center shadow-lg">
+        <div className="w-16 h-16 rounded-2xl bg-[#044541] border border-[#18D6A0]/40 text-[#18D6A0] flex items-center justify-center">
+          <Image className="w-8 h-8" />
         </div>
       </div>
 
       <div className="space-y-3 max-w-md">
-        <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-[#F3F7F5] tracking-tight">
           {gallerySettings.message || t('serviceUnavailableMsg')}
         </h1>
-        <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#A7B5AE] leading-relaxed">
           The verified Fleearn media gallery and credential archive is scheduled for release following regional audit completion.
         </p>
       </div>
@@ -44,9 +41,9 @@ export const GalleryPage: React.FC = () => {
       <div className="pt-2">
         <button
           onClick={() => navigateTo('home')}
-          className="px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-[#044541] hover:bg-[#033633] transition-all shadow-sm flex items-center gap-2 cursor-pointer"
+          className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[#F3F7F5] bg-[#044541] hover:bg-[#065b56] border border-[#18D6A0]/40 transition-all shadow-sm flex items-center gap-2 cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-[#18D6A0]" />
           <span>{t('backToHome')}</span>
         </button>
       </div>
