@@ -8,11 +8,18 @@
     color: #F3F7F5;
   }
 
-  /* Bengali Premium Typography */
-  [lang="bn"], html[lang="bn"], body[lang="bn"] {
-    font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Plus Jakarta Sans', system-ui, sans-serif;
-    letter-spacing: 0.015em;
-    line-height: 1.65;
+  /* Bengali Premium Typography - Hind Siliguri */
+  [lang="bn"], 
+  html[lang="bn"], 
+  body[lang="bn"],
+  html.lang-bn,
+  body.lang-bn,
+  html.lang-bn *,
+  body.lang-bn *,
+  [lang="bn"] * {
+    font-family: 'Hind Siliguri', 'Noto Sans Bengali', system-ui, -apple-system, sans-serif !important;
+    letter-spacing: 0.012em;
+    line-height: 1.62;
   }
 
   /* Arabic RTL font */

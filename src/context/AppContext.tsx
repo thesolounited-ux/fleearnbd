@@ -64,9 +64,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Hidden Gate Modal
   const [isGateModalOpen, setIsGateModalOpen] = useState(false);
 
-  // Update HTML language & direction
+  // Update HTML language, direction & font styling class
   useEffect(() => {
     document.documentElement.lang = language;
+    if (language === 'bn') {
+      document.documentElement.classList.add('lang-bn');
+      document.body.classList.add('lang-bn');
+    } else {
+      document.documentElement.classList.remove('lang-bn');
+      document.body.classList.remove('lang-bn');
+    }
+
     if (language === 'ar') {
       document.documentElement.dir = 'rtl';
     } else {
@@ -81,14 +89,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('fleearn_theme', 'dark');
   }, []);
 
-  // Fetch company settings on mount
+  // Fetch company settings on mount and listen to window focus / periodic sync
   useEffect(() => {
-    fetch('/api/company')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.name) setCompany(data);
-      })
-      .catch(() => {});
+    const fetchCompany = () => {
+      fetch(`/api/company?t=${Date.now()}`)
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => {
+          if (data && data.name) setCompany(data);
+        })
+        .catch(() => {});
+    };
+
+    fetchCompany();
+    const interval = setInterval(fetchCompany, 20000);
+    window.addEventListener('focus', fetchCompany);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchCompany);
+    };
   }, []);
 
   const setLanguage = (lang: Language) => {

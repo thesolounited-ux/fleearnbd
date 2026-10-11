@@ -111,19 +111,31 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const safeGet = (url: string) => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
+    const fetchHomeData = () => {
+      const now = Date.now();
+      const safeGet = (url: string) => fetch(`${url}?t=${now}`).then(r => r.ok ? r.json() : null).catch(() => null);
 
-    Promise.all([
-      safeGet('/api/notices'),
-      safeGet('/api/apps'),
-      safeGet('/api/courses'),
-      safeGet('/api/stats')
-    ]).then(([noticesRes, appsRes, coursesRes, statsRes]) => {
-      if (Array.isArray(noticesRes) && noticesRes.length > 0) setNotices(noticesRes.slice(0, 3));
-      if (Array.isArray(appsRes) && appsRes.length > 0) setAppData(appsRes[0]);
-      if (Array.isArray(coursesRes) && coursesRes.length > 0) setCourses(coursesRes.slice(0, 3));
-      if (statsRes && statsRes.totalUsers) setStats(statsRes);
-    });
+      Promise.all([
+        safeGet('/api/notices'),
+        safeGet('/api/apps'),
+        safeGet('/api/courses'),
+        safeGet('/api/stats')
+      ]).then(([noticesRes, appsRes, coursesRes, statsRes]) => {
+        if (Array.isArray(noticesRes) && noticesRes.length > 0) setNotices(noticesRes.slice(0, 3));
+        if (Array.isArray(appsRes) && appsRes.length > 0) setAppData(appsRes[0]);
+        if (Array.isArray(coursesRes) && coursesRes.length > 0) setCourses(coursesRes.slice(0, 3));
+        if (statsRes && statsRes.totalUsers) setStats(statsRes);
+      });
+    };
+
+    fetchHomeData();
+    const interval = setInterval(fetchHomeData, 20000);
+    window.addEventListener('focus', fetchHomeData);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchHomeData);
+    };
   }, []);
 
   const getNoticeTitle = (n: Notice) => {

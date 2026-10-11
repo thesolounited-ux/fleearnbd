@@ -85,12 +85,23 @@ export const PricingPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/pricing')
-      .then(r => (r.ok ? r.json() : null))
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) setPlans(data);
-      })
-      .catch(() => {});
+    const fetchPlans = () => {
+      fetch(`/api/pricing?t=${Date.now()}`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) setPlans(data);
+        })
+        .catch(() => {});
+    };
+
+    fetchPlans();
+    const interval = setInterval(fetchPlans, 15000);
+    window.addEventListener('focus', fetchPlans);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchPlans);
+    };
   }, []);
 
   const handleSelectPlan = (plan: PricingPlan) => {

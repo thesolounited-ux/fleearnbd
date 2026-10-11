@@ -77,21 +77,33 @@ export const NoticesPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState('All');
 
   useEffect(() => {
-    const safeGet = (url: string) => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
+    const fetchNotices = () => {
+      const now = Date.now();
+      const safeGet = (url: string) => fetch(`${url}?t=${now}`).then(r => r.ok ? r.json() : null).catch(() => null);
 
-    Promise.all([
-      safeGet('/api/notices'),
-      safeGet('/api/notices/previous')
-    ]).then(([active, prev]) => {
-      if (Array.isArray(active) && active.length > 0) setActiveNotices(active);
-      if (Array.isArray(prev) && prev.length > 0) setPreviousNotices(prev);
+      Promise.all([
+        safeGet('/api/notices'),
+        safeGet('/api/notices/previous')
+      ]).then(([active, prev]) => {
+        if (Array.isArray(active) && active.length > 0) setActiveNotices(active);
+        if (Array.isArray(prev) && prev.length > 0) setPreviousNotices(prev);
 
-      if (pageParams?.selectedNoticeId) {
-        const list = [...(Array.isArray(active) && active.length > 0 ? active : defaultActiveList), ...(Array.isArray(prev) && prev.length > 0 ? prev : defaultPrevList)];
-        const found = list.find(n => n.id === pageParams.selectedNoticeId);
-        if (found) setSelectedNotice(found);
-      }
-    });
+        if (pageParams?.selectedNoticeId) {
+          const list = [...(Array.isArray(active) && active.length > 0 ? active : defaultActiveList), ...(Array.isArray(prev) && prev.length > 0 ? prev : defaultPrevList)];
+          const found = list.find(n => n.id === pageParams.selectedNoticeId);
+          if (found) setSelectedNotice(found);
+        }
+      });
+    };
+
+    fetchNotices();
+    const interval = setInterval(fetchNotices, 20000);
+    window.addEventListener('focus', fetchNotices);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchNotices);
+    };
   }, [pageParams]);
 
   const currentList = activeTab === 'active' ? activeNotices : previousNotices;

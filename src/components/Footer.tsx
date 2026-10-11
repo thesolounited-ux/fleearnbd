@@ -17,8 +17,24 @@ export const Footer: React.FC = () => {
     let isMounted = true;
 
     const detectLocation = async () => {
+      // 1. Try our own serverless/worker geo endpoint first (reads Cloudflare / Vercel edge IP header)
       try {
-        // Fast geo-lookup
+        const localRes = await fetch('/api/geo', {
+          signal: AbortSignal.timeout ? AbortSignal.timeout(2000) : undefined
+        });
+        if (localRes.ok) {
+          const localData = await localRes.json();
+          if (localData && localData.country && isMounted) {
+            setUserCountry(localData.country);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to external lookup
+      }
+
+      // 2. Fast external geo-lookup
+      try {
         const res = await fetch('https://ipapi.co/json/', {
           signal: AbortSignal.timeout ? AbortSignal.timeout(2500) : undefined
         });

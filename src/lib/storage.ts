@@ -22,6 +22,17 @@ export function isR2Configured(): boolean {
   );
 }
 
+// Check if Vercel KV or Upstash Redis REST API is provided
+export function isKVConfigured(): boolean {
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  return Boolean(url && token);
+}
+
+export function isRemoteStorageConfigured(): boolean {
+  return isR2Configured() || isKVConfigured();
+}
+
 // Initialize S3 Client for Cloudflare R2
 let s3Client: S3Client | null = null;
 function getS3Client(): S3Client | null {
@@ -175,55 +186,111 @@ function getMimeType(fileName: string): string {
 }
 
 /**
- * Persistently stores the central database JSON into Cloudflare R2
+ * Persistently stores the central database JSON into Cloudflare R2 and/or Vercel KV / Upstash Redis
  */
 export async function saveRemoteDB(data: any): Promise<boolean> {
-  if (!isR2Configured()) return false;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
-  const r2 = getS3Client();
-  if (!r2) return false;
-  try {
-    const jsonStr = JSON.stringify(data, null, 2);
-    await r2.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: 'system/fleearn_live_db.json',
-        Body: Buffer.from(jsonStr, 'utf-8'),
-        ContentType: 'application/json',
-      })
-    );
-    return true;
-  } catch (err) {
-    console.error('Failed to sync db to Cloudflare R2:', err);
-    return false;
+  let savedAnywhere = false;
+  const jsonStr = JSON.stringify(data, null, 2);
+
+  // 1. Cloudflare R2 storage
+  if (isR2Configured()) {
+    const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
+    const r2 = getS3Client();
+    if (r2) {
+      try {
+        await r2.send(
+          new PutObjectCommand({
+            Bucket: bucketName,
+            Key: 'system/fleearn_live_db.json',
+            Body: Buffer.from(jsonStr, 'utf-8'),
+            ContentType: 'application/json',
+          })
+        );
+        savedAnywhere = true;
+      } catch (err) {
+        console.error('Failed to sync db to Cloudflare R2:', err);
+      }
+    }
   }
+
+  // 2. Vercel KV / Upstash Redis storage
+  if (isKVConfigured()) {
+    try {
+      const kvUrl = (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL)?.replace(/\/+$/, '');
+      const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (kvUrl && kvToken) {
+        const res = await fetch(`${kvUrl}/set/fleearn_live_db`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${kvToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonStr),
+        });
+        if (res.ok) {
+          savedAnywhere = true;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to sync db to KV:', err);
+    }
+  }
+
+  return savedAnywhere;
 }
 
 /**
- * Loads the central database JSON from Cloudflare R2
+ * Loads the central database JSON from Cloudflare R2 or Vercel KV / Upstash Redis
  */
 export async function loadRemoteDB(): Promise<any | null> {
-  if (!isR2Configured()) return null;
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
-  const r2 = getS3Client();
-  if (!r2) return null;
-  try {
-    const file = await getFile('system/fleearn_live_db.json');
-    if (file) {
-      if (file.buffer) {
-        return JSON.parse(file.buffer.toString('utf-8'));
-      }
-      if (file.stream) {
-        const chunks: Buffer[] = [];
-        for await (const chunk of file.stream) {
-          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  // 1. Try Cloudflare R2 first if configured
+  if (isR2Configured()) {
+    const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage';
+    const r2 = getS3Client();
+    if (r2) {
+      try {
+        const file = await getFile('system/fleearn_live_db.json');
+        if (file) {
+          if (file.buffer) {
+            return JSON.parse(file.buffer.toString('utf-8'));
+          }
+          if (file.stream) {
+            const chunks: Buffer[] = [];
+            for await (const chunk of file.stream) {
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            }
+            const content = Buffer.concat(chunks).toString('utf-8');
+            return JSON.parse(content);
+          }
         }
-        const content = Buffer.concat(chunks).toString('utf-8');
-        return JSON.parse(content);
+      } catch {
+        // Fall through to KV check
       }
     }
-  } catch {
-    // Initial run or file doesn't exist yet
   }
+
+  // 2. Try Vercel KV / Upstash Redis
+  if (isKVConfigured()) {
+    try {
+      const kvUrl = (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL)?.replace(/\/+$/, '');
+      const kvToken = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (kvUrl && kvToken) {
+        const res = await fetch(`${kvUrl}/get/fleearn_live_db`, {
+          headers: {
+            Authorization: `Bearer ${kvToken}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.result) {
+            return typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Failed to read from KV:', err);
+    }
+  }
+
   return null;
 }
