@@ -9,6 +9,7 @@ export interface CompanySettings {
   website: string;
   address: string;
   phone: string;
+  shortDescription?: string;
   socialLinks: {
     telegram: string;
     twitter: string;
@@ -28,6 +29,8 @@ export interface PlatformStats {
   isRealRecordBased: boolean;
 }
 
+export type NoticeType = 'text' | 'pdf' | 'image';
+
 export interface Notice {
   id: string;
   title: string;
@@ -39,11 +42,16 @@ export interface Notice {
   shortDescription_ru?: string;
   shortDescription_ar?: string;
   content: string;
+  noticeType: NoticeType;
+  fileUrl?: string;
+  r2Key?: string;
+  fileName?: string;
+  fileSize?: string;
   category: string;
   priority: 'Low' | 'Normal' | 'High';
   publicationDate: string;
   expirationDate: string;
-  status: 'active' | 'expired' | 'archived';
+  status: 'active' | 'inactive' | 'expired' | 'archived';
   views: number;
 }
 
@@ -55,6 +63,9 @@ export interface AppVersion {
   isLatest: boolean;
   status: string;
   notes: string;
+  downloadMethod?: 'upload' | 'external';
+  downloadUrl?: string;
+  r2Key?: string;
 }
 
 export interface MobileApp {
@@ -72,23 +83,34 @@ export interface MobileApp {
   isNew: boolean;
   shortDescription: string;
   description: string;
+  iconUrl?: string;
   screenshots: string[];
+  downloadMethod: 'upload' | 'external';
+  downloadUrl?: string;
+  r2Key?: string;
   changelog: string[];
   versions: AppVersion[];
+  status?: 'active' | 'inactive';
 }
+
+export type BillingType = 'Weekly' | 'Monthly' | 'Yearly' | 'Lifetime' | 'Custom';
 
 export interface PricingPlan {
   id: string;
   name: string;
   name_bn?: string;
-  priceUSD: number;
+  price: number;
+  priceUSD?: number;
   priceFSD: number;
   currency: string;
-  validity: string;
+  billingType: BillingType;
+  duration: string;
+  validity?: string;
+  shortDescription?: string;
   description: string;
   features: string[];
   isFeatured: boolean;
-  status: 'active' | 'archived';
+  status: 'active' | 'inactive' | 'archived';
   order: number;
 }
 
@@ -169,6 +191,19 @@ export interface ContactMessage {
   message: string;
   createdAt: string;
   status: 'Unread' | 'Replied';
+}
+
+export interface UploadedFileRecord {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  r2Key: string;
+  publicUrl: string;
+  category: 'apps/apk' | 'apps/icons' | 'apps/screenshots' | 'notices/pdf' | 'notices/images' | 'documents' | 'images';
+  uploadDate: string;
+  relatedId?: string;
+  storageProvider: 'r2' | 'local';
 }
 
 export interface AuditLog {

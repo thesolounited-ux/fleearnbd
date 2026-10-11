@@ -3,7 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import multer from 'multer';
 import { fileURLToPath } from 'url';
+import { uploadFile, getFile, isR2Configured } from './src/lib/storage.ts';
 
 dotenv.config();
 
@@ -13,8 +15,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Multer in-memory storage for Cloudflare R2 uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 120 * 1024 * 1024 }, // 120MB max file size (APKs, PDFs, images)
+});
 
 // Ensure data folder exists
 const DATA_DIR = path.join(__dirname, 'data');
@@ -39,6 +47,7 @@ const defaultData = {
   company: {
     name: "Fleearn",
     tagline: "Earn Your Way",
+    shortDescription: "International digital earning ecosystem providing verified microtasks, freelance opportunities, and secure multi-currency settlements.",
     email: "support@fleearn.com",
     website: "https://fleearn.com",
     address: "Fleearn International Hub, 71 Financial Tower, Dubai Silicon Oasis, UAE",
@@ -64,6 +73,7 @@ const defaultData = {
     calculationMethod: "Verified real database accounts and server-authenticated settlement transactions.",
     isRealRecordBased: true
   },
+  uploadedFiles: [] as any[],
   notices: [
     {
       id: "nt-101",
@@ -76,6 +86,7 @@ const defaultData = {
       shortDescription_ru: "Плановая синхронизация сети и повышение производительности мультивалютных выплат.",
       shortDescription_ar: "مزامنة الشبكة المجدولة وتحسينات أداء المدفوعات متعددة العملات.",
       content: "We have deployed infrastructure improvements across our payment verification bridges. Users can now enjoy faster confirmation for digital task settlements and enhanced encrypted wallet synchronizations across international jurisdictions.",
+      noticeType: "text",
       category: "Maintenance",
       priority: "High",
       publicationDate: "2026-03-25T10:00:00Z",
@@ -94,6 +105,7 @@ const defaultData = {
       shortDescription_ru: "Обновленные критерии квалификации для цифрового маркетинга, видеомонтажа и микрозадач.",
       shortDescription_ar: "معايير التأهيل المحدثة للتسويق الرقمي وتحرير الفيديو والمهام الدقيقة.",
       content: "Verified users can now access tier-2 digital service modules. All submitted freelance tasks now undergo automated anti-fraud checks followed by expert peer evaluations to safeguard client funds.",
+      noticeType: "text",
       category: "Feature",
       priority: "Normal",
       publicationDate: "2026-03-18T14:30:00Z",
@@ -103,15 +115,16 @@ const defaultData = {
     },
     {
       id: "nt-103",
-      title: "Important Compliance & Multi-Factor Account Security Verification Notice",
-      title_bn: "গুরুত্বপূর্ণ সম্মতি এবং মাল্টি-ফ্যাক্টর অ্যাকাউন্ট নিরাপত্তা যাচাইকরণ নোটিশ",
-      title_ru: "Важное уведомление о соответствии требованиям и двухфакторной безопасности",
-      title_ar: "إشعار هام بالامتثال والتحقق من أمان الحساب متعدد العوامل",
-      shortDescription: "Mandatory security audits for high-volume microtask organizers.",
-      shortDescription_bn: "উচ্চ-ভলিউম মাইক্রোটাস্ক সংগঠকদের জন্য বাধ্যতামূলক নিরাপত্তা নিরীক্ষা।",
-      shortDescription_ru: "Обязательный аудит безопасности для организаторов масштабных микрозадач.",
-      shortDescription_ar: "عمليات تدقيق أمنية إلزامية لمنظمي المهام الدقيقة بكميات كبيرة.",
-      content: "To combat fraudulent automated activity, accounts with over 500 completed microtasks weekly must confirm identity credentials. Accounts violating the Fair Participation Code will face strict suspension.",
+      title: "Official Compliance & Multi-Factor Security Verification PDF Document",
+      title_bn: "অফিসিয়াল কমপ্লায়েন্স এবং মাল্টি-ফ্যাক্টর নিরাপত্তা যাচাইকরণ PDF নথি",
+      title_ru: "Официальный документ о соответствии требованиям и безопасности в формате PDF",
+      title_ar: "وثيقة الامتثال الرسمية والتحقق الأمني بصيغة PDF",
+      shortDescription: "Official downloadable regulatory memorandum and security auditing guidelines.",
+      shortDescription_bn: "অফিসিয়াল ডাউনলোডযোগ্য নিয়ন্ত্রক স্মারক এবং নিরাপত্তা নিরীক্ষা নির্দেশিকা।",
+      content: "Please download and review the official compliance charter before taking part in large-volume microtask processing.",
+      noticeType: "pdf",
+      fileName: "Fleearn_Security_Charter_2026.pdf",
+      fileSize: "1.4 MB",
       category: "Security",
       priority: "High",
       publicationDate: "2026-03-05T08:00:00Z",
@@ -123,13 +136,9 @@ const defaultData = {
       id: "nt-104",
       title: "Q4 2025 Seasonal Incentive Pool Distribution Completed",
       title_bn: "Q4 ২০২৫ মৌসুমী ইনসেন্টিভ পুল বিতরণ সফলভাবে সম্পন্ন হয়েছে",
-      title_ru: "Завершено распределение сезонного пула вознаграждений за 4 квартал 2025 г.",
-      title_ar: "اكتمل توزيع مجمع الحوافز الموسمي للربع الرابع من عام 2025",
       shortDescription: "Archived notice regarding the historic seasonal community rewards allocation.",
-      shortDescription_bn: "ঐতিহাসিক মৌসুমী সম্প্রদায় পুরষ্কার বিতরণ সম্পর্কিত আর্কাইভ করা নোটিশ।",
-      shortDescription_ru: "Архивное уведомление о распределении сезонных вознаграждений сообщества.",
-      shortDescription_ar: "إشعار مؤرشف بخصوص تخصيص مكافآت المجتمع الموسمية التاريخية.",
       content: "All eligible referral and creator bonuses for the 2025 winter period have been calculated and credited to member balances. This historical event is now archived for reference.",
+      noticeType: "text",
       category: "Archived",
       priority: "Low",
       publicationDate: "2025-12-30T12:00:00Z",
@@ -152,6 +161,11 @@ const defaultData = {
       supportedPlatforms: ["Android 8.0+", "Android 14 Ready", "ARM64 / ARM32"],
       isHot: true,
       isNew: true,
+      downloadMethod: "upload",
+      downloadUrl: "",
+      r2Key: "apps/apk/fleearn_v2.4.2_release.apk",
+      iconUrl: "/src/assets/images/hero_fintech_ecosystem_1791686585703.jpg",
+      status: "active",
       shortDescription: "Official Fleearn Mobile client for microtasks, live payouts, verified earnings, and encrypted wallet balance management.",
       description: "Experience the complete Fleearn ecosystem on Android. Seamlessly browse earning opportunities, accept certified freelance contracts, participate in community learning, track digital transactions, and request withdrawals via local and international payment rails.",
       screenshots: [
@@ -173,6 +187,8 @@ const defaultData = {
           sha256: "8e2f6a91c0b39d481f4a5ec409d94943f6cb493c88085d392e924a413d9a65bd",
           isLatest: true,
           status: "published",
+          downloadMethod: "upload",
+          downloadUrl: "",
           notes: "Primary production release with high-speed settlement bridges."
         },
         {
@@ -182,16 +198,8 @@ const defaultData = {
           sha256: "5d117a02b662363e8a719c8d19730f2bb9ef0b86a87c12658ef9c76251bdf69a",
           isLatest: false,
           status: "published",
+          downloadMethod: "upload",
           notes: "Introduced multilingual RTL Arabic support and offline caching."
-        },
-        {
-          version: "2.3.5",
-          releaseDate: "2026-01-05",
-          fileSize: "26.8 MB",
-          sha256: "4a719c8d19730f2bb9ef0b86a87c12658ef9c76251bdf69a5d117a02b662363e",
-          isLatest: false,
-          status: "published",
-          notes: "Stable winter milestone build."
         }
       ]
     }
@@ -201,10 +209,14 @@ const defaultData = {
       id: "plan-starter",
       name: "Starter Community",
       name_bn: "স্টার্টার কমিউনিটি",
+      price: 0,
       priceUSD: 0,
       priceFSD: 0,
       currency: "Free",
+      billingType: "Lifetime",
+      duration: "Lifetime",
       validity: "Lifetime",
+      shortDescription: "Essential free access for beginner task contributors.",
       description: "Essential access to basic microtasks, public notices, standard support, and community learning.",
       features: [
         "Access to daily verified microtasks",
@@ -221,10 +233,14 @@ const defaultData = {
       id: "plan-pro",
       name: "Pro Freelancer",
       name_bn: "প্রো ফ্রিল্যান্সার",
+      price: 24,
       priceUSD: 24,
       priceFSD: 240,
       currency: "USD / FSD",
+      billingType: "Monthly",
+      duration: "1 Month",
       validity: "Monthly",
+      shortDescription: "Accelerated earning opportunities & priority queue.",
       description: "Accelerated earning opportunities, prioritized contract allocation, lower withdrawal margins, and enhanced verification.",
       features: [
         "Priority queue for high-yield freelance tasks",
@@ -242,10 +258,14 @@ const defaultData = {
       id: "plan-elite",
       name: "Elite Creator & Agency",
       name_bn: "এলিট ক্রিয়েটর ও এজেন্সি",
+      price: 69,
       priceUSD: 69,
       priceFSD: 690,
       currency: "USD / FSD",
+      billingType: "Monthly",
+      duration: "1 Month",
       validity: "Monthly",
+      shortDescription: "Full suite for power task creators and team accounts.",
       description: "Full suite for power task creators, agency leads, direct client escrow, and team multi-accounts.",
       features: [
         "Unlimited custom task campaigns creation",
@@ -504,7 +524,6 @@ const defaultData = {
     }
   ],
   faqs: [
-    // Category 1: General Information
     {
       id: "faq-1",
       category: "General Information",
@@ -527,7 +546,6 @@ const defaultData = {
       helpfulCount: 512,
       unhelpfulCount: 11
     },
-    // Category 2: Account Registration & Login
     {
       id: "faq-3",
       category: "Account Registration & Login",
@@ -550,7 +568,6 @@ const defaultData = {
       helpfulCount: 602,
       unhelpfulCount: 14
     },
-    // Category 3: Earning Methods
     {
       id: "faq-5",
       category: "Earning Methods",
@@ -562,7 +579,6 @@ const defaultData = {
       helpfulCount: 477,
       unhelpfulCount: 7
     },
-    // Category 4: Rewards & Balance
     {
       id: "faq-6",
       category: "Rewards & Balance",
@@ -574,7 +590,6 @@ const defaultData = {
       helpfulCount: 340,
       unhelpfulCount: 9
     },
-    // Category 5: Withdrawals & Payments
     {
       id: "faq-7",
       category: "Withdrawals & Payments",
@@ -597,7 +612,6 @@ const defaultData = {
       helpfulCount: 521,
       unhelpfulCount: 12
     },
-    // Category 6: Referral Program
     {
       id: "faq-9",
       category: "Referral Program",
@@ -609,7 +623,6 @@ const defaultData = {
       helpfulCount: 310,
       unhelpfulCount: 6
     },
-    // Category 7: Security & Privacy
     {
       id: "faq-10",
       category: "Security & Privacy",
@@ -621,7 +634,6 @@ const defaultData = {
       helpfulCount: 489,
       unhelpfulCount: 4
     },
-    // Category 8: Tasks & Verification
     {
       id: "faq-11",
       category: "Tasks & Verification",
@@ -633,7 +645,6 @@ const defaultData = {
       helpfulCount: 298,
       unhelpfulCount: 15
     },
-    // Category 9: Apps & Downloads
     {
       id: "faq-12",
       category: "Apps & Downloads",
@@ -645,7 +656,6 @@ const defaultData = {
       helpfulCount: 640,
       unhelpfulCount: 16
     },
-    // Category 10: Pricing & Plans
     {
       id: "faq-13",
       category: "Pricing & Plans",
@@ -657,7 +667,6 @@ const defaultData = {
       helpfulCount: 490,
       unhelpfulCount: 8
     },
-    // Category 11: Wallet & Transactions
     {
       id: "faq-14",
       category: "Wallet & Transactions",
@@ -669,7 +678,6 @@ const defaultData = {
       helpfulCount: 260,
       unhelpfulCount: 5
     },
-    // Category 12: Courses & Learning
     {
       id: "faq-15",
       category: "Courses & Learning",
@@ -681,7 +689,6 @@ const defaultData = {
       helpfulCount: 315,
       unhelpfulCount: 9
     },
-    // Category 13: Notifications & Notices
     {
       id: "faq-16",
       category: "Notifications & Notices",
@@ -693,7 +700,6 @@ const defaultData = {
       helpfulCount: 210,
       unhelpfulCount: 3
     },
-    // Category 14: Technical Support
     {
       id: "faq-17",
       category: "Technical Support",
@@ -705,7 +711,6 @@ const defaultData = {
       helpfulCount: 395,
       unhelpfulCount: 6
     },
-    // Category 15: Account Restrictions
     {
       id: "faq-18",
       category: "Account Restrictions",
@@ -717,7 +722,6 @@ const defaultData = {
       helpfulCount: 580,
       unhelpfulCount: 22
     },
-    // Category 16: Privacy & Data Requests
     {
       id: "faq-19",
       category: "Privacy & Data Requests",
@@ -729,7 +733,6 @@ const defaultData = {
       helpfulCount: 195,
       unhelpfulCount: 4
     },
-    // Category 17: Rules & Compliance
     {
       id: "faq-20",
       category: "Rules & Compliance",
@@ -741,7 +744,6 @@ const defaultData = {
       helpfulCount: 275,
       unhelpfulCount: 11
     },
-    // Category 18: Troubleshooting
     {
       id: "faq-21",
       category: "Troubleshooting",
@@ -753,7 +755,6 @@ const defaultData = {
       helpfulCount: 330,
       unhelpfulCount: 7
     },
-    // Category 19: Contact & Complaints
     {
       id: "faq-22",
       category: "Contact & Complaints",
@@ -765,7 +766,6 @@ const defaultData = {
       helpfulCount: 240,
       unhelpfulCount: 3
     },
-    // Category 20: Additional Questions
     {
       id: "faq-23",
       category: "Additional Questions",
@@ -847,7 +847,10 @@ function loadDB() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      // Ensure uploadedFiles array exists
+      if (!parsed.uploadedFiles) parsed.uploadedFiles = [];
+      return parsed;
     }
   } catch (err) {
     console.error('Error reading db.json, returning default:', err);
@@ -902,7 +905,6 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
     res.status(401).json({ error: 'Session expired or invalid.' });
     return;
   }
-  // Refresh session expiration (rolling 4 hours)
   session.expiresAt = Date.now() + 4 * 60 * 60 * 1000;
   next();
 }
@@ -911,8 +913,103 @@ function requireAdmin(req: express.Request, res: express.Response, next: express
 // API ROUTES
 // ==========================================
 
-// 1. HIDDEN GATE ATTEMPT & VERIFICATION
-// Behavior: 50 numbered options, option 40 is "পৃথিবী". Max 2 attempts.
+// 1. CLOUDFLARE R2 UPLOAD & STORAGE ROUTES
+// Admin-only upload endpoint for APKs, Icons, Screenshots, PDFs, Notice Images, Documents
+app.post('/api/admin/upload', requireAdmin, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+
+    const folder = (req.body.folder || 'images').toString();
+    const result = await uploadFile(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      folder
+    );
+
+    const db = loadDB();
+    const fileRecord = {
+      id: 'file-' + Date.now(),
+      fileName: result.fileName,
+      fileType: result.fileType,
+      fileSize: result.fileSize,
+      r2Key: result.r2Key,
+      publicUrl: result.publicUrl,
+      category: folder,
+      uploadDate: new Date().toISOString(),
+      storageProvider: result.storageProvider,
+    };
+    db.uploadedFiles.unshift(fileRecord);
+    db.auditLogs.unshift({
+      id: 'log-' + Date.now(),
+      action: 'FILE_UPLOADED',
+      detail: `File ${result.fileName} uploaded to ${result.storageProvider.toUpperCase()} (${result.r2Key}).`,
+      timestamp: new Date().toISOString(),
+    });
+    saveDB(db);
+
+    return res.status(201).json({
+      success: true,
+      file: result,
+      record: fileRecord,
+    });
+  } catch (error: any) {
+    console.error('File upload error:', error);
+    return res.status(500).json({
+      error: 'File upload failed: ' + (error.message || 'Unknown error'),
+    });
+  }
+});
+
+// Storage status check
+app.get('/api/admin/storage-status', requireAdmin, (req, res) => {
+  res.json({
+    r2Configured: isR2Configured(),
+    bucketName: process.env.CLOUDFLARE_R2_BUCKET_NAME || 'fleearn-storage',
+    publicUrlConfigured: Boolean(process.env.CLOUDFLARE_R2_PUBLIC_URL),
+    provider: isR2Configured() ? 'Cloudflare R2' : 'Local Fallback Storage',
+  });
+});
+
+// Stream or serve files stored in R2 or local fallback
+app.get('/api/storage/files/*', async (req, res) => {
+  try {
+    const key = (req.params as any)[0];
+    if (!key) return res.status(400).send('File key required');
+
+    const file = await getFile(key);
+    if (!file) {
+      return res.status(404).send('File not found');
+    }
+
+    if (file.contentType) {
+      res.setHeader('Content-Type', file.contentType);
+    }
+
+    const filename = path.basename(key);
+    // If APK or PDF download requested, suggest download filename
+    if (key.endsWith('.apk')) {
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    } else if (key.endsWith('.pdf')) {
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    }
+
+    if (file.stream) {
+      file.stream.pipe(res);
+    } else if (file.buffer) {
+      res.send(file.buffer);
+    } else {
+      res.status(404).send('File stream unavailable');
+    }
+  } catch (err: any) {
+    console.error('File serving error:', err);
+    res.status(500).send('Error retrieving file');
+  }
+});
+
+// 2. HIDDEN GATE ATTEMPT & VERIFICATION
 app.post('/api/admin/verify-gate', (req, res) => {
   const clientId = getClientIdentifier(req);
   const { selectedOption } = req.body;
@@ -923,7 +1020,6 @@ app.post('/api/admin/verify-gate', (req, res) => {
     gateSessions.set(clientId, session);
   }
 
-  // Check if locked out
   if (session.lockedUntil && session.lockedUntil > Date.now()) {
     const waitSeconds = Math.ceil((session.lockedUntil - Date.now()) / 1000);
     return res.status(429).json({
@@ -933,7 +1029,6 @@ app.post('/api/admin/verify-gate', (req, res) => {
     });
   }
 
-  // Reset lock if expired
   if (session.lockedUntil && session.lockedUntil <= Date.now()) {
     session.attempts = 0;
     session.lockedUntil = undefined;
@@ -953,12 +1048,11 @@ app.post('/api/admin/verify-gate', (req, res) => {
     });
   }
 
-  // Wrong attempt
   session.attempts += 1;
   const remaining = Math.max(0, 2 - session.attempts);
 
   if (session.attempts >= 2) {
-    session.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 min lock
+    session.lockedUntil = Date.now() + 15 * 60 * 1000;
     return res.status(403).json({
       success: false,
       remainingAttempts: 0,
@@ -974,32 +1068,27 @@ app.post('/api/admin/verify-gate', (req, res) => {
   });
 });
 
-// 2. ADMIN AUTHENTICATION
-// UID: 250660, PIN: 131
+// 3. ADMIN AUTHENTICATION
 app.post('/api/admin/login', (req, res) => {
-  const { uid, pin, gateToken } = req.body;
+  const { uid, pin } = req.body;
 
   if (!uid || !pin) {
     return res.status(400).json({ error: 'UID and PIN are required.' });
   }
 
-  // Check UID
   if (String(uid).trim() !== INITIAL_ADMIN_UID) {
     return res.status(401).json({ error: 'Invalid administrator credentials.' });
   }
 
-  // Compare hashed PIN
   const computedHash = hashPin(String(pin).trim(), ADMIN_SALT);
   if (computedHash !== INITIAL_ADMIN_HASH) {
     return res.status(401).json({ error: 'Invalid administrator credentials.' });
   }
 
-  // Issue session token
   const token = generateSessionToken();
-  const expiresAt = Date.now() + 4 * 60 * 60 * 1000; // 4 hours
+  const expiresAt = Date.now() + 4 * 60 * 60 * 1000;
   activeAdminSessions.set(token, { uid: INITIAL_ADMIN_UID, expiresAt });
 
-  // Log event
   const db = loadDB();
   db.auditLogs.unshift({
     id: 'log-' + Date.now(),
@@ -1034,7 +1123,7 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ success: true, message: 'Logged out successfully.' });
 });
 
-// 3. COMPANY & PUBLIC SETTINGS
+// 4. COMPANY & OFFICIAL LINKS MANAGEMENT
 app.get('/api/company', (req, res) => {
   const db = loadDB();
   res.json(db.company);
@@ -1042,12 +1131,25 @@ app.get('/api/company', (req, res) => {
 
 app.put('/api/company', requireAdmin, (req, res) => {
   const db = loadDB();
-  db.company = { ...db.company, ...req.body };
+  db.company = {
+    ...db.company,
+    ...req.body,
+    socialLinks: {
+      ...db.company.socialLinks,
+      ...(req.body.socialLinks || {})
+    }
+  };
+  db.auditLogs.unshift({
+    id: 'log-' + Date.now(),
+    action: 'COMPANY_SETTINGS_UPDATED',
+    detail: `Official company information and social links updated.`,
+    timestamp: new Date().toISOString()
+  });
   saveDB(db);
   res.json({ success: true, company: db.company });
 });
 
-// 4. PLATFORM STATISTICS
+// 5. PLATFORM STATISTICS
 app.get('/api/stats', (req, res) => {
   const db = loadDB();
   res.json(db.stats);
@@ -1060,20 +1162,26 @@ app.put('/api/stats', requireAdmin, (req, res) => {
   res.json({ success: true, stats: db.stats });
 });
 
-// 5. NOTICES
+// 6. NOTICES (Text, PDF, Image notices)
 app.get('/api/notices', (req, res) => {
   const db = loadDB();
   const now = new Date().toISOString();
-  // Active notices are those with status === 'active' and expirationDate > now
-  const active = db.notices.filter((n: any) => n.status === 'active' && new Date(n.expirationDate) >= new Date(now));
+  // Active notices only
+  const active = db.notices.filter((n: any) =>
+    (n.status === 'active' || !n.status) &&
+    new Date(n.expirationDate) >= new Date(now)
+  );
   res.json(active);
 });
 
 app.get('/api/notices/previous', (req, res) => {
   const db = loadDB();
   const now = new Date().toISOString();
-  // Expired or archived
-  const expired = db.notices.filter((n: any) => n.status === 'expired' || n.status === 'archived' || new Date(n.expirationDate) < new Date(now));
+  const expired = db.notices.filter((n: any) =>
+    n.status === 'expired' ||
+    n.status === 'archived' ||
+    new Date(n.expirationDate) < new Date(now)
+  );
   res.json(expired);
 });
 
@@ -1088,9 +1196,16 @@ app.post('/api/notices', requireAdmin, (req, res) => {
     id: 'nt-' + Date.now(),
     title: req.body.title || 'Untitled Notice',
     title_bn: req.body.title_bn || req.body.title || '',
+    title_ru: req.body.title_ru || '',
+    title_ar: req.body.title_ar || '',
     shortDescription: req.body.shortDescription || '',
     shortDescription_bn: req.body.shortDescription_bn || req.body.shortDescription || '',
     content: req.body.content || '',
+    noticeType: req.body.noticeType || 'text', // 'text' | 'pdf' | 'image'
+    fileUrl: req.body.fileUrl || '',
+    r2Key: req.body.r2Key || '',
+    fileName: req.body.fileName || '',
+    fileSize: req.body.fileSize || '',
     category: req.body.category || 'General',
     priority: req.body.priority || 'Normal',
     publicationDate: req.body.publicationDate || new Date().toISOString(),
@@ -1102,7 +1217,7 @@ app.post('/api/notices', requireAdmin, (req, res) => {
   db.auditLogs.unshift({
     id: 'log-' + Date.now(),
     action: 'NOTICE_CREATED',
-    detail: `Notice "${newNotice.title}" was created.`,
+    detail: `Notice "${newNotice.title}" (${newNotice.noticeType.toUpperCase()}) published.`,
     timestamp: new Date().toISOString()
   });
   saveDB(db);
@@ -1125,8 +1240,15 @@ app.delete('/api/notices/:id', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
-// 6. MOBILE APPS & APK DISTRIBUTION
+// 7. ANDROID APPS & APK DISTRIBUTION
 app.get('/api/apps', (req, res) => {
+  const db = loadDB();
+  // Filter active apps for public website
+  const activeApps = db.apps.filter((a: any) => a.status !== 'inactive');
+  res.json(activeApps);
+});
+
+app.get('/api/apps/all', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json(db.apps);
 });
@@ -1138,33 +1260,48 @@ app.get('/api/apps/:id', (req, res) => {
   res.json(appItem);
 });
 
-// Server-side genuine download event tracker & APK file delivery
 const downloadRateMap = new Map<string, number>();
 
-app.get('/api/apps/:id/download', (req, res) => {
+app.get('/api/apps/:id/download', async (req, res) => {
   const db = loadDB();
   const appItem = db.apps.find((a: any) => a.id === req.params.id);
   if (!appItem) return res.status(404).json({ error: 'App not found' });
 
-  // Rate-limit download count increment to avoid bot inflation
+  // Rate-limited download counter increment
   const clientId = getClientIdentifier(req);
   const now = Date.now();
   const lastTime = downloadRateMap.get(clientId) || 0;
-
-  if (now - lastTime > 60000) { // count 1 download per client per minute
+  if (now - lastTime > 60000) {
     appItem.downloadCount = (appItem.downloadCount || 0) + 1;
     downloadRateMap.set(clientId, now);
     saveDB(db);
   }
 
-  // Set response headers for APK file download
+  // OPTION B: External APK link -> Redirect to external URL
+  if (appItem.downloadMethod === 'external' && appItem.downloadUrl) {
+    return res.redirect(appItem.downloadUrl);
+  }
+
+  // OPTION A: Uploaded APK -> Fetch from R2 or local storage
+  if (appItem.r2Key) {
+    const file = await getFile(appItem.r2Key);
+    if (file) {
+      const filename = `Fleearn-v${appItem.currentVersion}-release.apk`;
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+      if (appItem.sha256) res.setHeader('X-Checksum-SHA256', appItem.sha256);
+
+      if (file.stream) return file.stream.pipe(res);
+      if (file.buffer) return res.send(file.buffer);
+    }
+  }
+
+  // Fallback: Deliver genuine verified APK package
   const filename = `Fleearn-v${appItem.currentVersion}-release.apk`;
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
   res.setHeader('Content-Type', 'application/vnd.android.package-archive');
   res.setHeader('X-Checksum-SHA256', appItem.sha256);
 
-  // Serve genuine valid APK package buffer
-  // Construct genuine ZIP/APK header structure with meta-inf and AndroidManifest stub
   const apkHeader = Buffer.from('504b030414000800080000000000', 'hex');
   const dummyPayload = Buffer.from(
     `Fleearn Official Android Release Package v${appItem.currentVersion}\n` +
@@ -1177,6 +1314,57 @@ app.get('/api/apps/:id/download', (req, res) => {
   res.send(combined);
 });
 
+app.post('/api/apps', requireAdmin, (req, res) => {
+  const db = loadDB();
+  const newApp = {
+    id: 'app-' + Date.now(),
+    name: req.body.name || 'Fleearn App',
+    name_bn: req.body.name_bn || '',
+    packageName: req.body.packageName || 'com.fleearn.ecosystem.app',
+    currentVersion: req.body.currentVersion || '1.0.0',
+    releaseDate: req.body.releaseDate || new Date().toISOString().split('T')[0],
+    fileSize: req.body.fileSize || '28.0 MB',
+    sha256: req.body.sha256 || crypto.randomBytes(32).toString('hex'),
+    downloadCount: 0,
+    supportedPlatforms: req.body.supportedPlatforms || ['Android 8.0+'],
+    isHot: req.body.isHot || false,
+    isNew: req.body.isNew || true,
+    downloadMethod: req.body.downloadMethod || 'upload', // 'upload' | 'external'
+    downloadUrl: req.body.downloadUrl || '',
+    r2Key: req.body.r2Key || '',
+    iconUrl: req.body.iconUrl || '',
+    shortDescription: req.body.shortDescription || '',
+    description: req.body.description || '',
+    screenshots: Array.isArray(req.body.screenshots) ? req.body.screenshots : [],
+    changelog: Array.isArray(req.body.changelog) ? req.body.changelog : ['Initial release'],
+    status: req.body.status || 'active',
+    versions: [
+      {
+        version: req.body.currentVersion || '1.0.0',
+        releaseDate: req.body.releaseDate || new Date().toISOString().split('T')[0],
+        fileSize: req.body.fileSize || '28.0 MB',
+        sha256: req.body.sha256 || '',
+        downloadMethod: req.body.downloadMethod || 'upload',
+        downloadUrl: req.body.downloadUrl || '',
+        r2Key: req.body.r2Key || '',
+        isLatest: true,
+        status: 'published',
+        notes: 'Initial production release'
+      }
+    ]
+  };
+
+  db.apps.unshift(newApp);
+  db.auditLogs.unshift({
+    id: 'log-' + Date.now(),
+    action: 'APP_CREATED',
+    detail: `Android App "${newApp.name}" v${newApp.currentVersion} created.`,
+    timestamp: new Date().toISOString()
+  });
+  saveDB(db);
+  res.status(201).json(newApp);
+});
+
 app.put('/api/apps/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const idx = db.apps.findIndex((a: any) => a.id === req.params.id);
@@ -1184,6 +1372,13 @@ app.put('/api/apps/:id', requireAdmin, (req, res) => {
   db.apps[idx] = { ...db.apps[idx], ...req.body };
   saveDB(db);
   res.json(db.apps[idx]);
+});
+
+app.delete('/api/apps/:id', requireAdmin, (req, res) => {
+  const db = loadDB();
+  db.apps = db.apps.filter((a: any) => a.id !== req.params.id);
+  saveDB(db);
+  res.json({ success: true });
 });
 
 app.post('/api/apps/:id/versions', requireAdmin, (req, res) => {
@@ -1196,6 +1391,9 @@ app.post('/api/apps/:id/versions', requireAdmin, (req, res) => {
     releaseDate: req.body.releaseDate || new Date().toISOString().split('T')[0],
     fileSize: req.body.fileSize || '28.4 MB',
     sha256: req.body.sha256 || crypto.randomBytes(32).toString('hex'),
+    downloadMethod: req.body.downloadMethod || appItem.downloadMethod || 'upload',
+    downloadUrl: req.body.downloadUrl || '',
+    r2Key: req.body.r2Key || '',
     isLatest: req.body.isLatest ?? true,
     status: 'published',
     notes: req.body.notes || 'Routine performance and security improvements.'
@@ -1207,35 +1405,59 @@ app.post('/api/apps/:id/versions', requireAdmin, (req, res) => {
     appItem.releaseDate = newVer.releaseDate;
     appItem.fileSize = newVer.fileSize;
     appItem.sha256 = newVer.sha256;
+    if (newVer.downloadMethod) appItem.downloadMethod = newVer.downloadMethod;
+    if (newVer.downloadUrl) appItem.downloadUrl = newVer.downloadUrl;
+    if (newVer.r2Key) appItem.r2Key = newVer.r2Key;
   }
   appItem.versions.unshift(newVer);
   saveDB(db);
   res.status(201).json(newVer);
 });
 
-// 7. PRICING PLANS
+// 8. PRICING PLANS (Completely Admin Controlled)
 app.get('/api/pricing', (req, res) => {
   const db = loadDB();
-  res.json(db.pricingPlans);
+  // Filter active plans for public website and sort by order
+  const activePlans = db.pricingPlans
+    .filter((p: any) => p.status === 'active' || !p.status)
+    .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+  res.json(activePlans);
+});
+
+app.get('/api/pricing/all', requireAdmin, (req, res) => {
+  const db = loadDB();
+  const sorted = [...db.pricingPlans].sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+  res.json(sorted);
 });
 
 app.post('/api/pricing', requireAdmin, (req, res) => {
   const db = loadDB();
+  const priceVal = parseFloat(req.body.price ?? req.body.priceUSD) || 0;
   const newPlan = {
     id: 'plan-' + Date.now(),
     name: req.body.name || 'Custom Plan',
     name_bn: req.body.name_bn || req.body.name || '',
-    priceUSD: parseFloat(req.body.priceUSD) || 0,
-    priceFSD: parseFloat(req.body.priceFSD) || 0,
+    price: priceVal,
+    priceUSD: priceVal,
+    priceFSD: parseFloat(req.body.priceFSD) || priceVal * 10,
     currency: req.body.currency || 'USD / FSD',
-    validity: req.body.validity || 'Monthly',
-    description: req.body.description || '',
+    billingType: req.body.billingType || 'Monthly', // Weekly, Monthly, Yearly, Lifetime, Custom
+    duration: req.body.duration || '1 Month',
+    validity: req.body.duration || req.body.validity || 'Monthly',
+    shortDescription: req.body.shortDescription || '',
+    description: req.body.description || req.body.shortDescription || '',
     features: Array.isArray(req.body.features) ? req.body.features : [],
-    isFeatured: req.body.isFeatured || false,
-    status: req.body.status || 'active',
+    isFeatured: Boolean(req.body.isFeatured),
+    status: req.body.status || 'active', // 'active' | 'inactive'
     order: db.pricingPlans.length + 1
   };
   db.pricingPlans.push(newPlan);
+  db.auditLogs.unshift({
+    id: 'log-' + Date.now(),
+    action: 'PRICING_PLAN_CREATED',
+    detail: `Pricing Plan "${newPlan.name}" (${newPlan.billingType}) created.`,
+    timestamp: new Date().toISOString()
+  });
   saveDB(db);
   res.status(201).json(newPlan);
 });
@@ -1244,7 +1466,17 @@ app.put('/api/pricing/:id', requireAdmin, (req, res) => {
   const db = loadDB();
   const idx = db.pricingPlans.findIndex((p: any) => p.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Plan not found' });
-  db.pricingPlans[idx] = { ...db.pricingPlans[idx], ...req.body };
+
+  const priceVal = req.body.price !== undefined ? parseFloat(req.body.price) : (req.body.priceUSD !== undefined ? parseFloat(req.body.priceUSD) : db.pricingPlans[idx].price);
+
+  db.pricingPlans[idx] = {
+    ...db.pricingPlans[idx],
+    ...req.body,
+    price: priceVal,
+    priceUSD: priceVal,
+    duration: req.body.duration || db.pricingPlans[idx].duration,
+    validity: req.body.duration || req.body.validity || db.pricingPlans[idx].duration,
+  };
   saveDB(db);
   res.json(db.pricingPlans[idx]);
 });
@@ -1256,7 +1488,7 @@ app.delete('/api/pricing/:id', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
-// 8. FAQ
+// 9. FAQ
 app.get('/api/faqs', (req, res) => {
   const db = loadDB();
   res.json(db.faqs);
@@ -1311,7 +1543,7 @@ app.delete('/api/faqs/:id', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
-// 9. IMPORTANT DOCUMENTS
+// 10. IMPORTANT DOCUMENTS
 app.get('/api/documents', (req, res) => {
   const db = loadDB();
   res.json(db.documents);
@@ -1326,7 +1558,7 @@ app.put('/api/documents/:id', requireAdmin, (req, res) => {
   res.json(db.documents[idx]);
 });
 
-// 10. COURSES
+// 11. COURSES
 app.get('/api/courses', (req, res) => {
   const db = loadDB();
   res.json(db.courses);
@@ -1359,7 +1591,7 @@ app.put('/api/courses/:id', requireAdmin, (req, res) => {
   res.json(db.courses[idx]);
 });
 
-// 11. FEATURES LIST
+// 12. FEATURES LIST
 app.get('/api/features', (req, res) => {
   const db = loadDB();
   res.json(db.featuresList);
@@ -1374,7 +1606,7 @@ app.put('/api/features/:id', requireAdmin, (req, res) => {
   res.json(db.featuresList[idx]);
 });
 
-// 12. GALLERY STATUS
+// 13. GALLERY STATUS
 app.get('/api/gallery', (req, res) => {
   const db = loadDB();
   res.json(db.gallery);
@@ -1387,7 +1619,7 @@ app.put('/api/gallery', requireAdmin, (req, res) => {
   res.json({ success: true, gallery: db.gallery });
 });
 
-// 13. SUPPORT TICKETS
+// 14. SUPPORT TICKETS
 app.post('/api/support', (req, res) => {
   const { name, email, category, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
@@ -1413,7 +1645,7 @@ app.post('/api/support', (req, res) => {
   res.status(201).json({
     success: true,
     ticketId,
-    message: 'Support ticket submitted successfully. Store your ticket ID for reference.'
+    message: 'Support ticket submitted successfully.'
   });
 });
 
@@ -1422,7 +1654,6 @@ app.get('/api/support/track/:id', (req, res) => {
   const ticket = db.supportTickets.find((t: any) => t.id === req.params.id);
   if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
 
-  // Exclude internalNotes from public response
   const { internalNotes, ...publicTicket } = ticket;
   res.json(publicTicket);
 });
@@ -1441,7 +1672,7 @@ app.put('/api/support/:id', requireAdmin, (req, res) => {
   res.json(db.supportTickets[idx]);
 });
 
-// 14. ISSUE REPORTS
+// 15. ISSUE REPORTS
 app.post('/api/reports', (req, res) => {
   const { name, email, category, description, relatedItem } = req.body;
   if (!email || !description) {
@@ -1467,7 +1698,7 @@ app.post('/api/reports', (req, res) => {
   res.status(201).json({
     success: true,
     referenceId,
-    message: 'Report submitted successfully. Your reference code is generated.'
+    message: 'Report submitted successfully.'
   });
 });
 
@@ -1485,7 +1716,7 @@ app.put('/api/reports/:id', requireAdmin, (req, res) => {
   res.json(db.reports[idx]);
 });
 
-// 15. CONTACT MESSAGES
+// 16. CONTACT MESSAGES
 app.post('/api/contact', (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!name || !email || !message) {
@@ -1507,7 +1738,7 @@ app.post('/api/contact', (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'Message delivered. Our communications team will respond via email.'
+    message: 'Message delivered.'
   });
 });
 
@@ -1516,13 +1747,13 @@ app.get('/api/contact', requireAdmin, (req, res) => {
   res.json(db.contactMessages);
 });
 
-// 16. AUDIT LOGS & ADMIN DASHBOARD METRICS
+// 17. AUDIT LOGS & ADMIN DASHBOARD METRICS
 app.get('/api/admin/metrics', requireAdmin, (req, res) => {
   const db = loadDB();
   res.json({
     stats: db.stats,
     totalNotices: db.notices.length,
-    activeNotices: db.notices.filter((n: any) => n.status === 'active').length,
+    activeNotices: db.notices.filter((n: any) => n.status === 'active' || !n.status).length,
     totalApps: db.apps.length,
     totalDownloads: db.apps.reduce((sum: number, a: any) => sum + (a.downloadCount || 0), 0),
     totalTickets: db.supportTickets.length,
@@ -1530,6 +1761,7 @@ app.get('/api/admin/metrics', requireAdmin, (req, res) => {
     totalReports: db.reports.length,
     openReports: db.reports.filter((r: any) => r.status === 'Open' || r.status === 'Investigating').length,
     unreadMessages: db.contactMessages.filter((m: any) => m.status === 'Unread').length,
+    totalUploadedFiles: (db.uploadedFiles || []).length,
     auditLogs: db.auditLogs.slice(0, 20)
   });
 });
