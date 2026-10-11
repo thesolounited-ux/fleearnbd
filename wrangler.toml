@@ -1,13 +1,6 @@
-name = "fleearn"
-main = "./worker.ts"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
+name = "neamandibyvachy"
+compatibility_date = "2025-10-11"
 
 [assets]
 directory = "./dist"
-binding = "ASSETS"
-
-[vars]
-ENVIRONMENT = "production"
-NODE_ENV = "production"
-CLOUDFLARE_R2_BUCKET_NAME = "fleearn-storage"
+not_found_handling = "single-page-application"
