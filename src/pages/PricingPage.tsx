@@ -5,20 +5,92 @@ import { Check, Smartphone, Info } from 'lucide-react';
 
 export const PricingPage: React.FC = () => {
   const { t, language, navigateTo } = useApp();
-  const [plans, setPlans] = useState<PricingPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const defaultPlans: PricingPlan[] = [
+    {
+      id: "plan-starter",
+      name: "Starter Community",
+      name_bn: "স্টার্টার কমিউনিটি",
+      price: 0,
+      priceUSD: 0,
+      priceFSD: 0,
+      currency: "Free",
+      billingType: "Lifetime",
+      duration: "Lifetime",
+      validity: "Lifetime",
+      shortDescription: "Open access for beginner task contributors and micro-earners.",
+      description: "Zero barrier to start. Browse verified notice boards, take onboarding skill tests, and complete baseline community microtasks.",
+      features: [
+        "Full access to beginner verified task queues",
+        "Public notice board & official document access",
+        "Standard multi-currency withdrawal channels",
+        "Community forum & self-service knowledge base"
+      ],
+      isFeatured: false,
+      status: "active",
+      order: 1
+    },
+    {
+      id: "plan-pro",
+      name: "Pro Freelancer",
+      name_bn: "প্রো ফ্রিল্যান্সার",
+      price: 24,
+      priceUSD: 24,
+      priceFSD: 240,
+      currency: "USD / FSD",
+      billingType: "Monthly",
+      duration: "1 Month",
+      validity: "Monthly",
+      shortDescription: "Accelerated earning opportunities & priority queue.",
+      description: "Accelerated earning opportunities, prioritized contract allocation, lower withdrawal margins, and enhanced verification.",
+      features: [
+        "Priority queue for high-yield freelance tasks",
+        "Fast-track 6-hour payout approvals",
+        "Reduced transaction fee (1.8%)",
+        "Skill verification badge & client rating boost",
+        "Dedicated ticket response SLA (<4 hours)",
+        "Access to Pro skill courses & toolkits"
+      ],
+      isFeatured: true,
+      status: "active",
+      order: 2
+    },
+    {
+      id: "plan-elite",
+      name: "Elite Creator & Agency",
+      name_bn: "এলিট ক্রিয়েটর ও এজেন্সি",
+      price: 69,
+      priceUSD: 69,
+      priceFSD: 690,
+      currency: "USD / FSD",
+      billingType: "Monthly",
+      duration: "1 Month",
+      validity: "Monthly",
+      shortDescription: "Full suite for power task creators and team accounts.",
+      description: "Full suite for power task creators, agency leads, direct client escrow, and team multi-accounts.",
+      features: [
+        "Unlimited custom task campaigns creation",
+        "Zero payout platform commission",
+        "Multi-agent team delegate accounts",
+        "Dedicated VIP Account Concierge",
+        "Direct API webhook access for bulk payouts",
+        "Custom branded contractor certification"
+      ],
+      isFeatured: false,
+      status: "active",
+      order: 3
+    }
+  ];
+
+  const [plans, setPlans] = useState<PricingPlan[]>(defaultPlans);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch('/api/pricing')
-      .then(r => r.json())
+      .then(r => (r.ok ? r.json() : null))
       .then(data => {
-        if (Array.isArray(data)) setPlans(data);
-        setLoading(false);
+        if (Array.isArray(data) && data.length > 0) setPlans(data);
       })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+      .catch(() => {});
   }, []);
 
   const handleSelectPlan = (plan: PricingPlan) => {

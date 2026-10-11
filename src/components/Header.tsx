@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Language } from '../types';
-import { Globe, Moon, Sun, Menu, X, ShieldCheck } from 'lucide-react';
+import { Globe, Menu, X, ShieldCheck, Download } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { language, setLanguage, theme, toggleTheme, currentPage, navigateTo, t, adminToken } = useApp();
+  const { language, setLanguage, currentPage, navigateTo, t, adminToken } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
@@ -35,18 +35,20 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/90 dark:bg-[#0B0F0E]/90 border-b border-neutral-200/80 dark:border-neutral-800/80 transition-colors">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#0B0F0E]/95 border-b border-[#1E2B27] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Zone 1: Single text element wordmark */}
+        {/* Zone 1: Wordmark */}
         <button
           onClick={() => handleNavClick('home')}
-          className="text-xl font-extrabold tracking-tight text-[#044541] dark:text-emerald-400 whitespace-nowrap shrink-0 hover:opacity-90 transition-opacity flex items-center gap-2 cursor-pointer"
+          className="text-xl sm:text-2xl font-black tracking-tight text-white whitespace-nowrap shrink-0 hover:text-emerald-400 transition-colors flex items-center gap-2 cursor-pointer"
         >
-          <span>Fleearn</span>
+          <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-white bg-clip-text text-transparent">
+            Fleearn
+          </span>
         </button>
 
-        {/* Zone 2: Navigation links */}
-        <nav className="hidden xl:flex items-center gap-5 text-sm font-medium text-neutral-600 dark:text-neutral-300">
+        {/* Zone 2: Desktop Navigation links */}
+        <nav className="hidden xl:flex items-center gap-5 text-sm font-medium text-neutral-300">
           {navItems.map((item) => {
             const isActive = currentPage === item.id;
             return (
@@ -55,8 +57,8 @@ export const Header: React.FC = () => {
                 onClick={() => handleNavClick(item.id)}
                 className={`transition-colors whitespace-nowrap shrink-0 py-1 cursor-pointer ${
                   isActive
-                    ? 'text-[#044541] dark:text-emerald-400 font-semibold border-b-2 border-[#044541] dark:border-emerald-400'
-                    : 'hover:text-[#044541] dark:hover:text-white'
+                    ? 'text-emerald-400 font-semibold border-b-2 border-emerald-400'
+                    : 'hover:text-white'
                 }`}
               >
                 {item.label}
@@ -66,7 +68,7 @@ export const Header: React.FC = () => {
           {adminToken && (
             <button
               onClick={() => handleNavClick('admin-dashboard')}
-              className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+              className="text-amber-400 font-semibold flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 hover:text-amber-300"
             >
               <ShieldCheck className="w-4 h-4" />
               <span>{t('admin')}</span>
@@ -74,17 +76,17 @@ export const Header: React.FC = () => {
           )}
         </nav>
 
-        {/* Zone 3: 1 primary action + Language & Theme */}
+        {/* Zone 3: Language + Action + Mobile Menu Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Language Selector */}
           <div className="relative">
             <button
               onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-              className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+              className="p-2 rounded-xl text-neutral-300 hover:text-white bg-[#141C1A] hover:bg-[#1A2622] border border-[#1E2B27] transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
               aria-label="Select Language"
             >
-              <Globe className="w-4 h-4" />
-              <span className="hidden sm:inline uppercase">{language}</span>
+              <Globe className="w-4 h-4 text-emerald-400" />
+              <span className="uppercase text-[11px] sm:text-xs">{language}</span>
             </button>
 
             {langDropdownOpen && (
@@ -93,7 +95,7 @@ export const Header: React.FC = () => {
                   className="fixed inset-0 z-40"
                   onClick={() => setLangDropdownOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-36 bg-white dark:bg-[#141B19] rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-800 py-1 z-50 text-xs">
+                <div className="absolute right-0 mt-2 w-36 bg-[#141C1A] rounded-xl shadow-2xl border border-[#1E2B27] py-1.5 z-50 text-xs">
                   {languages.map((l) => (
                     <button
                       key={l.code}
@@ -103,8 +105,8 @@ export const Header: React.FC = () => {
                       }}
                       className={`w-full text-left px-3 py-2 flex items-center justify-between transition-colors cursor-pointer ${
                         language === l.code
-                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-[#044541] dark:text-emerald-400 font-bold'
-                          : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                          ? 'bg-emerald-950/60 text-emerald-400 font-bold'
+                          : 'text-neutral-300 hover:bg-[#1E2B27] hover:text-white'
                       }`}
                     >
                       <span>{l.name}</span>
@@ -116,27 +118,19 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
-            aria-label="Toggle Theme"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-          </button>
-
-          {/* Primary Action Button */}
+          {/* Primary Action Button (Download App) */}
           <button
             onClick={() => handleNavClick('apps')}
-            className="px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-[#044541] hover:bg-[#033633] rounded-lg shadow-sm transition-all whitespace-nowrap shrink-0 cursor-pointer"
+            className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold text-white bg-[#044541] hover:bg-[#065b56] active:scale-95 rounded-xl border border-emerald-700/40 shadow-sm transition-all whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5"
           >
-            {t('downloadApp')}
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{t('downloadApp')}</span>
           </button>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden p-2 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
+            className="xl:hidden p-2 rounded-xl text-neutral-300 hover:text-white bg-[#141C1A] hover:bg-[#1A2622] border border-[#1E2B27] cursor-pointer transition-colors"
             aria-label="Open Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -144,29 +138,32 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer Navigation */}
+      {/* Mobile Drawer Navigation (Touch-Friendly & Dark) */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white/95 dark:bg-[#0B0F0E]/95 backdrop-blur-md px-4 pt-3 pb-6 space-y-1">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
-                currentPage === item.id
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-[#044541] dark:text-emerald-400 font-semibold'
-                  : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="xl:hidden border-t border-[#1E2B27] bg-[#0B0F0E]/98 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-2 gap-1.5 pb-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-colors cursor-pointer min-h-[44px] flex items-center ${
+                  currentPage === item.id
+                    ? 'bg-emerald-950/70 text-emerald-400 font-bold border border-emerald-800/60'
+                    : 'text-neutral-300 hover:bg-[#16201D] hover:text-white border border-transparent'
+                }`}
+              >
+                <span className="truncate">{item.label}</span>
+              </button>
+            ))}
+          </div>
+
           {adminToken && (
             <button
               onClick={() => handleNavClick('admin-dashboard')}
-              className="w-full text-left px-3 py-2 rounded-md text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2 cursor-pointer"
+              className="w-full text-left px-4 py-3 rounded-xl text-sm font-bold text-amber-400 bg-amber-950/40 border border-amber-800/50 flex items-center gap-2 cursor-pointer mt-2"
             >
               <ShieldCheck className="w-4 h-4" />
-              <span>{t('admin')}</span>
+              <span>{t('admin')} Central Console</span>
             </button>
           )}
         </div>

@@ -50,7 +50,8 @@ export interface Notice {
   category: string;
   priority: 'Low' | 'Normal' | 'High';
   publicationDate: string;
-  expirationDate: string;
+  expirationDate?: string;
+  isPinned?: boolean;
   status: 'active' | 'inactive' | 'expired' | 'archived';
   views: number;
 }
@@ -74,23 +75,32 @@ export interface MobileApp {
   name_bn?: string;
   packageName: string;
   currentVersion: string;
+  versionCode?: number;
   releaseDate: string;
+  minAndroidVersion?: string;
+  targetAndroidVersion?: string;
   fileSize: string;
-  sha256: string;
+  sha256?: string;
+  sha256Hash?: string;
   downloadCount: number;
-  supportedPlatforms: string[];
-  isHot: boolean;
-  isNew: boolean;
+  supportedPlatforms?: string[];
+  isHot?: boolean;
+  isNew?: boolean;
   shortDescription: string;
-  description: string;
+  shortDescription_bn?: string;
+  description?: string;
+  fullDescription?: string;
+  fullDescription_bn?: string;
   iconUrl?: string;
   screenshots: string[];
   downloadMethod: 'upload' | 'external';
   downloadUrl?: string;
   r2Key?: string;
   changelog: string[];
-  versions: AppVersion[];
+  versions?: AppVersion[];
   status?: 'active' | 'inactive';
+  ratingsAverage?: number;
+  ratingsCount?: number;
 }
 
 export type BillingType = 'Weekly' | 'Monthly' | 'Yearly' | 'Lifetime' | 'Custom';

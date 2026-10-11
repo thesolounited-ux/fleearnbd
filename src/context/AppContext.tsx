@@ -46,11 +46,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved && ['en', 'bn', 'ru', 'ar'].includes(saved) ? saved : 'en';
   });
 
-  // Theme initialization
-  const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('fleearn_theme') as Theme;
-    return saved && ['light', 'dark'].includes(saved) ? saved : 'dark';
-  });
+  // Theme is strictly DARK MODE ONLY
+  const [theme] = useState<Theme>('dark');
 
   // Navigation
   const [currentPage, setCurrentPage] = useState<string>('home');
@@ -67,7 +64,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Hidden Gate Modal
   const [isGateModalOpen, setIsGateModalOpen] = useState(false);
 
-  // Update HTML classes & dir
+  // Update HTML language & direction
   useEffect(() => {
     document.documentElement.lang = language;
     if (language === 'ar') {
@@ -77,13 +74,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [language]);
 
+  // Permanently enforce Dark Mode
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    localStorage.setItem('fleearn_theme', 'dark');
+  }, []);
 
   // Fetch company settings on mount
   useEffect(() => {
@@ -101,11 +97,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const toggleTheme = () => {
-    setThemeState(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('fleearn_theme', next);
-      return next;
-    });
+    // Strictly dark mode only
+    document.documentElement.classList.add('dark');
   };
 
   const setAdminToken = (token: string | null) => {

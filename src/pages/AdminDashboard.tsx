@@ -65,26 +65,51 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
 
     const headers = { Authorization: `Bearer ${adminToken}` };
+    const safeFetch = (url: string, opts?: any) =>
+      fetch(url, opts)
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null);
 
     Promise.all([
-      fetch('/api/admin/metrics', { headers }).then(r => r.json()),
-      fetch('/api/admin/storage-status', { headers }).then(r => r.json()),
-      fetch('/api/notices/all', { headers }).then(r => r.json()),
-      fetch('/api/apps/all', { headers }).then(r => r.json()),
-      fetch('/api/pricing/all', { headers }).then(r => r.json()),
-      fetch('/api/documents').then(r => r.json()),
-      fetch('/api/faqs').then(r => r.json()),
-      fetch('/api/courses').then(r => r.json()),
-      fetch('/api/support', { headers }).then(r => r.json()),
-      fetch('/api/reports', { headers }).then(r => r.json()),
-      fetch('/api/company').then(r => r.json()),
-      fetch('/api/gallery').then(r => r.json()),
+      safeFetch('/api/admin/metrics', { headers }),
+      safeFetch('/api/admin/storage-status', { headers }),
+      safeFetch('/api/notices/all', { headers }),
+      safeFetch('/api/apps/all', { headers }),
+      safeFetch('/api/pricing/all', { headers }),
+      safeFetch('/api/documents'),
+      safeFetch('/api/faqs'),
+      safeFetch('/api/courses'),
+      safeFetch('/api/support', { headers }),
+      safeFetch('/api/reports', { headers }),
+      safeFetch('/api/company'),
+      safeFetch('/api/gallery'),
     ]).then(([m, s, n, a, p, d, f, c, t, rep, comp, gal]) => {
-      setMetrics(m);
-      setStorageStatus(s);
-      if (Array.isArray(n)) setNotices(n);
-      if (Array.isArray(a)) setApps(a);
-      if (Array.isArray(p)) setPlans(p);
+      if (m) setMetrics(m);
+      if (s) setStorageStatus(s);
+      if (Array.isArray(n) && n.length > 0) {
+        setNotices(n);
+        localStorage.setItem('fleearn_admin_notices', JSON.stringify(n));
+      } else {
+        const cached = localStorage.getItem('fleearn_admin_notices');
+        if (cached) try { setNotices(JSON.parse(cached)); } catch {}
+      }
+
+      if (Array.isArray(a) && a.length > 0) {
+        setApps(a);
+        localStorage.setItem('fleearn_admin_apps', JSON.stringify(a));
+      } else {
+        const cached = localStorage.getItem('fleearn_admin_apps');
+        if (cached) try { setApps(JSON.parse(cached)); } catch {}
+      }
+
+      if (Array.isArray(p) && p.length > 0) {
+        setPlans(p);
+        localStorage.setItem('fleearn_admin_plans', JSON.stringify(p));
+      } else {
+        const cached = localStorage.getItem('fleearn_admin_plans');
+        if (cached) try { setPlans(JSON.parse(cached)); } catch {}
+      }
+
       if (Array.isArray(d)) setDocuments(d);
       if (Array.isArray(f)) setFaqs(f);
       if (Array.isArray(c)) setCourses(c);
