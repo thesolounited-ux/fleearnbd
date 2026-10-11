@@ -57,7 +57,7 @@ export const AdminLoginPage: React.FC = () => {
     }
 
     // Direct credential verification fallback so administrators are never blocked by network issues
-    if (cleanUid === '250660' && cleanPin === '131') {
+    if (cleanUid === '250660' && cleanPin === '1331') {
       const fallbackToken = 'adm_sess_' + Math.random().toString(36).substring(2) + '_' + Date.now();
       setAdminToken(fallbackToken);
       sessionStorage.removeItem('fleearn_gate_token');
