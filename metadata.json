@@ -1,0 +1,6 @@
+{
+  "name": "Fleearn - Earn your way",
+  "description": "Premium international earning ecosystem website with mobile apps, notices, pricing plans, and multi-lingual support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
