@@ -14,7 +14,7 @@ export const AdminLoginPage: React.FC = () => {
     const cleanUid = uid.trim();
     const cleanPin = pin.trim();
 
-    if (!cleanUid || !cleanPin) {
+    if (!cleanUid ||!cleanPin) {
       setError('UID and PIN are required.');
       return;
     }
@@ -22,47 +22,36 @@ export const AdminLoginPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    const gateToken = sessionStorage.getItem('fleearn_gate_token');
+    // 1. HARDCODED LOGIN FIRST - Works on Vercel + Cloudflare even without API
+    if (cleanUid === '250660' && cleanPin === '1331') {
+      const fallbackToken = 'adm_sess_' + Math.random().toString(36).substring(2) + '_' + Date.now();
+      setAdminToken(fallbackToken);
+      sessionStorage.removeItem('fleearn_gate_token');
+      navigateTo('admin-dashboard');
+      setLoading(false);
+      return;
+    }
 
+    // 2. Try API Login (for future dynamic login)
+    const gateToken = sessionStorage.getItem('fleearn_gate_token');
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid: cleanUid, pin: cleanPin, gateToken })
       });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.token) {
-          setAdminToken(data.token);
-          sessionStorage.removeItem('fleearn_gate_token');
-          navigateTo('admin-dashboard');
-          return;
-        } else {
-          setError(data.error || 'Invalid administrator credentials.');
-          setLoading(false);
-          return;
-        }
-      } else {
-        // If server returned 401 or other explicit HTTP status
-        const data = await res.json().catch(() => ({}));
-        if (data.error) {
-          setError(data.error);
-          setLoading(false);
-          return;
-        }
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success && data.token) {
+        setAdminToken(data.token);
+        sessionStorage.removeItem('fleearn_gate_token');
+        navigateTo('admin-dashboard');
+        return;
+      }
+      if (data.error) {
+        setError(data.error);
       }
     } catch {
-      // Network failure / static host fallback (e.g. on Vercel static deployment)
-    }
-
-    // Direct credential verification fallback so administrators are never blocked by network issues
-    if (cleanUid === '250660' && cleanPin === '1331') {
-      const fallbackToken = 'adm_sess_' + Math.random().toString(36).substring(2) + '_' + Date.now();
-      setAdminToken(fallbackToken);
-      sessionStorage.removeItem('fleearn_gate_token');
-      navigateTo('admin-dashboard');
-      return;
+      // Network fail - ignore, will show invalid below
     }
 
     setError('Invalid administrator credentials.');
@@ -133,7 +122,7 @@ export const AdminLoginPage: React.FC = () => {
             disabled={loading}
             className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[#044541] hover:bg-[#065b56] active:scale-[0.99] transition-all cursor-pointer shadow-lg disabled:opacity-50 mt-2"
           >
-            {loading ? 'Authenticating...' : 'Authenticate Admin Session'}
+            {loading? 'Authenticating...' : 'Authenticate Admin Session'}
           </button>
         </form>
 
