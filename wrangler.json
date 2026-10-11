@@ -1,19 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "fleearn",
+  "name": "Fleearn",
   "main": "./worker.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": [
     "nodejs_compat"
-  "],"
+  ],
   "d1_databases": [
     {
       "binding": "FLED1",
       "database_id": "fb84a3aa-308f-413d-8bda-81a7d6c13a41"
     }
   ],
-  // ...
-}
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
